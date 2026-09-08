@@ -20,7 +20,7 @@ export const metadata = {
       "Register as a Life Member or General Member of Biddyasetu. Access the verified alumni directory, scholarship programs, reunions, and exclusive community benefits.",
     url: "https://biddyasetu.org/membership",
     type: "website",
-    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Join Biddyasetu — Alumni Registration" }],
+    images: [{ url: "/logo.png", width: 1200, height: 630, alt: "Join Biddyasetu — Alumni Registration" }],
   },
 
   twitter: {
@@ -28,7 +28,7 @@ export const metadata = {
     title: "Become a Biddyasetu Member — Alumni Registration",
     description:
       "Join 850+ alumni from Adarsha High School, Kaitola. Register for Life or General membership and access exclusive alumni benefits.",
-    images: ["/og-image.jpg"],
+    images: ["/logo.png"],
   },
 };
 

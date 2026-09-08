@@ -19,7 +19,7 @@ export const metadata = {
       "Get in touch with Biddyasetu. Send a message, inquire about membership or scholarships, or find our official donation bank details.",
     url: "https://biddyasetu.org/contact",
     type: "website",
-    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Contact Biddyasetu" }],
+    images: [{ url: "/logo.png", width: 1200, height: 630, alt: "Contact Biddyasetu" }],
   },
 
   twitter: {
@@ -27,7 +27,7 @@ export const metadata = {
     title: "Contact Biddyasetu — Alumni Organization, Kaitola",
     description:
       "Reach out to Biddyasetu for membership, scholarships, donations, or general inquiries. We are here to help.",
-    images: ["/og-image.jpg"],
+    images: ["/logo.png"],
   },
 };
 

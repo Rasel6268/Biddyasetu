@@ -20,7 +20,7 @@ export const metadata = {
       "Find and connect with alumni from Adarsha High School, Kaitola. Filter by batch, profession, and country. Join the Biddyasetu community today.",
     url: "https://biddyasetu.org/members",
     type: "website",
-    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Biddyasetu Alumni Directory" }],
+    images: [{ url: "/logo.png", width: 1200, height: 630, alt: "Biddyasetu Alumni Directory" }],
   },
 
   twitter: {
@@ -28,7 +28,7 @@ export const metadata = {
     title: "Biddyasetu Alumni Directory — Search 850+ Members",
     description:
       "Browse and connect with verified alumni of Adarsha High School, Kaitola across Bangladesh and worldwide.",
-    images: ["/og-image.jpg"],
+    images: ["/logo.png"],
   },
 };
 

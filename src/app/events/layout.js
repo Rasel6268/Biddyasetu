@@ -9,9 +9,6 @@ export const metadata = {
     "alumni fundraiser Bangladesh", "alumni workshop Kaitola",
   ],
 
-  alternates: {
-    canonical: "https://biddyasetu.org/events",
-  },
 
   openGraph: {
     title: "Events & Reunions — Biddyasetu Alumni Programs",
@@ -19,7 +16,7 @@ export const metadata = {
       "Join upcoming reunions, workshops, and community events organized by Biddyasetu alumni of Adarsha High School, Kaitola. Register your RSVP online.",
     url: "https://biddyasetu.org/events",
     type: "website",
-    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Biddyasetu Events & Reunions" }],
+    images: [{ url: "/logo.png", width: 1200, height: 630, alt: "Biddyasetu Events & Reunions" }],
   },
 
   twitter: {
@@ -27,7 +24,7 @@ export const metadata = {
     title: "Biddyasetu Events — Alumni Reunions & Programs",
     description:
       "Upcoming alumni reunions, batch gatherings, and community programs by Biddyasetu — Adarsha High School, Kaitola.",
-    images: ["/og-image.jpg"],
+    images: ["/logo.png"],
   },
 };
 

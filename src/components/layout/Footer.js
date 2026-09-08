@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   GraduationCap,
   Mail,
@@ -26,36 +27,22 @@ const footerLinks = {
   ],
   "Get Involved": [
     { label: "Become a Member", href: "/membership" },
+    { label: "Alumni Portal Login", href: "/login" },
     { label: "Donate to Welfare Fund", href: "/contact#donate" },
     { label: "Contact Committee", href: "/contact" },
   ],
 };
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  // Do not render marketing footer on application dashboard & admin console
+  if (pathname?.startsWith("/dashboard") || pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   return (
     <footer className="bg-slate-950 text-white">
-      {/* Donation Banner */}
-      <div className="bg-gradient-to-r from-sky-700 via-sky-600 to-sky-500 py-12 px-6 text-center">
-        <div className="max-w-2xl mx-auto">
-          <p className="text-xs font-extrabold tracking-widest text-sky-100 uppercase mb-2">
-            Support Student Education
-          </p>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-3 text-white tracking-tight">
-            Help Us Empower More Students
-          </h2>
-          <p className="text-sky-100 text-sm sm:text-base mb-6 leading-relaxed">
-            Your contribution directly finances scholarships and emergency relief for deserving students of Adarsha High School, Kaitola.
-          </p>
-          <Link
-            href="/contact#donate"
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-yellow-400 hover:bg-yellow-300 text-slate-900 font-extrabold text-sm sm:text-base shadow-lg shadow-yellow-500/20 hover:shadow-xl hover:shadow-yellow-500/30 hover:-translate-y-0.5 transition-all"
-          >
-            <Heart className="w-5 h-5 fill-slate-900" />
-            Donate to Fund
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-      </div>
 
       {/* Main Footer Links */}
       <div className="max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">

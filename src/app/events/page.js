@@ -11,14 +11,29 @@ import {
   CheckCircle,
   X,
   Sparkles,
-  Filter,
 } from "lucide-react";
 
 const typeColors = {
-  Reunion: { bg: "rgba(6,163,236,0.1)", color: "var(--primary-dark)", border: "var(--primary)" },
-  Ceremony: { bg: "rgba(22,163,74,0.1)", color: "var(--success)", border: "var(--success)" },
-  Workshop: { bg: "rgba(124,58,237,0.1)", color: "#7c3aed", border: "#7c3aed" },
-  Fundraiser: { bg: "rgba(250,228,6,0.15)", color: "#854d0e", border: "#f59e0b" },
+  Reunion: {
+    bg: "bg-[rgba(6,163,236,0.1)]",
+    color: "text-[var(--primary-dark)]",
+    border: "border-[var(--primary)]"
+  },
+  Ceremony: {
+    bg: "bg-[rgba(22,163,74,0.1)]",
+    color: "text-[var(--success)]",
+    border: "border-[var(--success)]"
+  },
+  Workshop: {
+    bg: "bg-[rgba(124,58,237,0.1)]",
+    color: "text-[#7c3aed]",
+    border: "border-[#7c3aed]"
+  },
+  Fundraiser: {
+    bg: "bg-[rgba(250,228,6,0.15)]",
+    color: "text-[#854d0e]",
+    border: "border-[#f59e0b]"
+  },
 };
 
 export default function EventsPage() {
@@ -49,105 +64,61 @@ export default function EventsPage() {
   return (
     <>
       {/* Hero Banner */}
-      <section
-        style={{
-          background: "linear-gradient(135deg, #0284c7 0%, #06A3EC 50%, #38bdf8 100%)",
-          padding: "4.5rem 1.5rem 3.5rem",
-          textAlign: "center",
-          color: "white",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#0284c7] via-[#06A3EC] to-[#38bdf8] py-[4.5rem] px-6 pb-14 text-center text-white">
         <div
+          className="absolute inset-0 pointer-events-none"
           style={{
-            position: "absolute",
-            inset: 0,
-            backgroundImage: "radial-gradient(circle at 20% 80%, rgba(255,255,255,0.12) 0%, transparent 40%), radial-gradient(circle at 80% 20%, rgba(250,228,6,0.15) 0%, transparent 40%)",
-            pointerEvents: "none",
+            backgroundImage: `
+              radial-gradient(circle at 20% 80%, rgba(255,255,255,0.12) 0%, transparent 40%),
+              radial-gradient(circle at 80% 20%, rgba(250,228,6,0.15) 0%, transparent 40%)
+            `,
           }}
         />
-        <div style={{ maxWidth: "760px", margin: "0 auto", position: "relative", zIndex: 2 }}>
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.4rem",
-              padding: "0.35rem 1rem",
-              borderRadius: "9999px",
-              background: "rgba(255, 255, 255, 0.16)",
-              border: "1px solid rgba(255, 255, 255, 0.3)",
-              fontSize: "0.8125rem",
-              fontWeight: 600,
-              marginBottom: "1rem",
-              backdropFilter: "blur(6px)",
-            }}
-          >
-            <Sparkles size={14} color="#fde047" /> Official Gatherings & Programs
+        <div className="relative z-10 max-w-[760px] mx-auto">
+          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/16 border border-white/30 text-[0.8125rem] font-semibold backdrop-blur-sm mb-4">
+            <Sparkles size={14} color="#fde047" />
+            Official Gatherings & Programs
           </span>
-          <h1 style={{ fontSize: "clamp(2.25rem, 5vw, 3.25rem)", fontWeight: 900, marginBottom: "0.75rem", letterSpacing: "-0.02em" }}>
+          <h1 className="text-[clamp(2.25rem,5vw,3.25rem)] font-extrabold mb-3 tracking-tight">
             Events & Reunions
           </h1>
-          <p style={{ fontSize: "1.0625rem", opacity: 0.92, lineHeight: 1.6, maxWidth: "600px", margin: "0 auto" }}>
-            Stay connected through batch reunions, skill-building workshops, award ceremonies, and community fundraisers.
+          <p className="text-[1.0625rem] opacity-90 leading-relaxed max-w-[600px] mx-auto">
+            Stay connected through batch reunions, skill-building workshops,
+            award ceremonies, and community fundraisers.
           </p>
         </div>
       </section>
 
       {/* Filter & Search Bar */}
-      <section
-        style={{
-          background: "var(--surface)",
-          padding: "1.25rem 1.5rem",
-          borderBottom: "1px solid var(--border)",
-          position: "sticky",
-          top: "70px",
-          zIndex: 40,
-          boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
-        }}
-      >
-        <div style={{ maxWidth: "1000px", margin: "0 auto", display: "flex", gap: "1rem", alignItems: "center", flexWrap: "wrap" }}>
+      <section className="sticky top-[76px] z-30 bg-[var(--surface)] px-6 py-5 border-b border-[var(--border)] shadow-[0_4px_12px_rgba(0,0,0,0.03)]">
+        <div className="max-w-[1000px] mx-auto flex gap-4 items-center flex-wrap">
           {/* Search */}
-          <div style={{ flex: 1, minWidth: "240px", position: "relative" }}>
-            <Search size={16} color="var(--text-muted)" style={{ position: "absolute", left: "0.875rem", top: "50%", transform: "translateY(-50%)" }} />
+          <div className="flex-1 min-w-[240px] relative">
+            <Search
+              size={16}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
+            />
             <input
               type="text"
               placeholder="Search events by title, venue, or keyword..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "0.65rem 0.875rem 0.65rem 2.5rem",
-                borderRadius: "0.5rem",
-                border: "1.5px solid var(--border)",
-                background: "var(--background)",
-                fontSize: "0.875rem",
-                outline: "none",
-              }}
+              className="w-full py-2.5 pl-10 pr-3.5 rounded-lg border-[1.5px] border-[var(--border)] bg-[var(--background)] text-sm outline-none focus:border-[var(--primary)] transition-colors"
             />
           </div>
 
           {/* Category Tabs */}
-          <div style={{ display: "flex", gap: "0.4rem", overflowX: "auto" }}>
+          <div className="flex gap-1.5 overflow-x-auto pb-1">
             {categories.map((cat) => {
               const isSelected = selectedType === cat;
               return (
                 <button
                   key={cat}
                   onClick={() => setSelectedType(cat)}
-                  style={{
-                    padding: "0.4rem 0.85rem",
-                    borderRadius: "9999px",
-                    border: isSelected ? "1px solid var(--primary)" : "1px solid var(--border)",
-                    background: isSelected ? "var(--primary)" : "#ffffff",
-                    color: isSelected ? "#ffffff" : "var(--text)",
-                    fontWeight: isSelected ? 700 : 500,
-                    fontSize: "0.8rem",
-                    cursor: "pointer",
-                    textTransform: "capitalize",
-                    whiteSpace: "nowrap",
-                    transition: "all 0.15s ease",
-                  }}
+                  className={`px-3.5 py-1.5 rounded-full text-sm font-medium capitalize whitespace-nowrap transition-all duration-150 ${isSelected
+                    ? "bg-[var(--primary)] text-white border border-[var(--primary)] shadow-sm"
+                    : "bg-white text-[var(--text)] border border-[var(--border)] hover:border-[var(--primary)] hover:text-[var(--primary)]"
+                    }`}
                 >
                   {cat === "all" ? "All Events" : cat}
                 </button>
@@ -157,17 +128,22 @@ export default function EventsPage() {
         </div>
       </section>
 
-      {/* Events List */}
-      <section className="section-padding" style={{ background: "var(--background)", minHeight: "60vh" }}>
-        <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "0 1.5rem" }}>
+      {/* Events Grid */}
+      <section className="py-16 px-6 bg-[var(--background)] min-h-[60vh]">
+        <div className="max-w-[1200px] mx-auto">
           {filteredEvents.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "4rem 1.5rem", background: "white", borderRadius: "1rem", border: "1px dashed var(--border)", color: "var(--text-muted)" }}>
-              <Calendar size={48} style={{ margin: "0 auto 1rem", opacity: 0.3 }} />
-              <h3 style={{ fontWeight: 700, fontSize: "1.125rem", color: "var(--text)", marginBottom: "0.5rem" }}>No events found</h3>
-              <p style={{ fontSize: "0.875rem" }}>Try changing your filter category or search keyword.</p>
+            <div className="text-center py-16 px-6 bg-white rounded-2xl border border-dashed border-[var(--border)] text-[var(--text-muted)]">
+              <Calendar size={48} className="mx-auto mb-4 opacity-30" />
+              <h3 className="font-bold text-lg text-[var(--text)] mb-2">
+                No events found
+              </h3>
+              <p className="text-sm">
+                Try changing your filter category or search keyword.
+              </p>
             </div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+            /* Grid Layout: 1 column on mobile, 2 on tablet, 3 on desktop */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredEvents.map((event) => {
                 const tc = typeColors[event.type] || typeColors.Reunion;
                 const d = new Date(event.date);
@@ -179,103 +155,66 @@ export default function EventsPage() {
                 return (
                   <article
                     key={event.id}
-                    className="card interactive-card-sm"
-                    style={{
-                      padding: "1.75rem",
-                      display: "flex",
-                      gap: "1.5rem",
-                      alignItems: "center",
-                      flexWrap: "wrap",
-                      borderRadius: "1.125rem",
-                      border: "1.5px solid var(--border)",
-                    }}
+                    className="bg-white rounded-[1.125rem] border-[1.5px] border-[var(--border)] p-6 flex flex-col hover:shadow-lg hover:border-[var(--primary)] transition-all duration-200"
                   >
                     {/* Date Block */}
-                    <div
-                      style={{
-                        textAlign: "center",
-                        background: "linear-gradient(135deg, #0369a1, #06A3EC)",
-                        borderRadius: "0.875rem",
-                        padding: "1rem 1.25rem",
-                        color: "white",
-                        minWidth: "75px",
-                        flexShrink: 0,
-                        boxShadow: "0 4px 14px rgba(6,163,236,0.25)",
-                      }}
-                    >
-                      <div style={{ fontSize: "1.85rem", fontWeight: 900, lineHeight: 1 }}>{day}</div>
-                      <div style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", opacity: 0.9 }}>
+                    <div className="text-center bg-gradient-to-br from-[#0369a1] to-[#06A3EC] rounded-xl px-5 py-4 text-white min-w-[75px] self-start mb-4 shadow-[0_4px_14px_rgba(6,163,236,0.25)]">
+                      <div className="text-[1.85rem] font-black leading-none">
+                        {day}
+                      </div>
+                      <div className="text-xs font-bold uppercase opacity-90">
                         {month}
                       </div>
-                      <div style={{ fontSize: "0.7rem", opacity: 0.75 }}>{year}</div>
+                      <div className="text-[0.7rem] opacity-75">
+                        {year}
+                      </div>
                     </div>
 
                     {/* Content */}
-                    <div style={{ flex: 1, minWidth: "260px" }}>
-                      <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "0.4rem" }}>
+                    <div className="flex-1">
+                      <div className="flex gap-2 items-center mb-1.5 flex-wrap">
                         <span
-                          style={{
-                            padding: "0.2rem 0.65rem",
-                            borderRadius: "9999px",
-                            background: tc.bg,
-                            color: tc.color,
-                            fontSize: "0.72rem",
-                            fontWeight: 700,
-                            border: `1px solid ${tc.border}30`,
-                          }}
+                          className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${tc.bg} ${tc.color} ${tc.border}30`}
                         >
                           {event.type}
                         </span>
                       </div>
 
-                      <h2 style={{ fontWeight: 800, fontSize: "1.25rem", color: "var(--text)", marginBottom: "0.5rem", lineHeight: 1.3 }}>
+                      <h2 className="font-extrabold text-xl text-[var(--text)] mb-2 leading-tight line-clamp-2">
                         {event.title}
                       </h2>
-                      <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", lineHeight: 1.6, marginBottom: "0.85rem" }}>
+
+                      <p className="text-[var(--text-muted)] text-sm leading-relaxed mb-3 line-clamp-2">
                         {event.desc}
                       </p>
 
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
-                        <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>
-                          <Clock size={14} color="var(--primary)" /> {event.time}
+                      <div className="flex flex-wrap gap-3 mb-4">
+                        <span className="flex items-center gap-1.5 text-[0.8125rem] text-[var(--text-muted)]">
+                          <Clock size={14} className="text-[var(--primary)] shrink-0" />
+                          {event.time}
                         </span>
-                        <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>
-                          <MapPin size={14} color="var(--primary)" /> {event.venue}
+                        <span className="flex items-center gap-1.5 text-[0.8125rem] text-[var(--text-muted)]">
+                          <MapPin size={14} className="text-[var(--primary)] shrink-0" />
+                          {event.venue}
                         </span>
-                        <span style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.8125rem", color: "var(--text-muted)" }}>
-                          <Users size={14} color="var(--primary)" /> {event.attending + (isRegistered ? 1 : 0)} attending
+                        <span className="flex items-center gap-1.5 text-[0.8125rem] text-[var(--text-muted)]">
+                          <Users size={14} className="text-[var(--primary)] shrink-0" />
+                          {event.attending + (isRegistered ? 1 : 0)} attending
                         </span>
                       </div>
                     </div>
 
                     {/* Action Button */}
-                    <div style={{ flexShrink: 0 }}>
+                    <div className="mt-auto pt-2">
                       {isRegistered ? (
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.35rem",
-                            padding: "0.6rem 1.25rem",
-                            borderRadius: "0.5rem",
-                            background: "rgba(22,163,74,0.1)",
-                            color: "var(--success)",
-                            fontWeight: 700,
-                            fontSize: "0.85rem",
-                          }}
-                        >
-                          <CheckCircle size={16} /> RSVP Confirmed
+                        <div className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-[rgba(22,163,74,0.1)] text-[var(--success)] font-bold text-sm w-full justify-center">
+                          <CheckCircle size={16} />
+                          RSVP Confirmed
                         </div>
                       ) : (
                         <button
                           onClick={() => setActiveModalEvent(event)}
-                          className="btn-outline"
-                          style={{
-                            padding: "0.6rem 1.35rem",
-                            fontSize: "0.85rem",
-                            borderRadius: "0.5rem",
-                            fontWeight: 700,
-                          }}
+                          className="w-full px-5 py-2.5 rounded-lg border-[1.5px] border-[var(--border)] hover:border-[var(--primary)] hover:bg-[var(--primary)] hover:text-white font-bold text-sm transition-all duration-200"
                         >
                           Register RSVP
                         </button>
@@ -292,105 +231,57 @@ export default function EventsPage() {
       {/* RSVP Modal */}
       {activeModalEvent && (
         <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 100,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "1rem",
-            backgroundColor: "rgba(15, 23, 42, 0.65)",
-            backdropFilter: "blur(4px)",
-            animation: "fadeIn 0.2s ease-out",
-          }}
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[rgba(15,23,42,0.65)] backdrop-blur-sm"
           onClick={() => setActiveModalEvent(null)}
         >
           <div
-            style={{
-              background: "#ffffff",
-              borderRadius: "1.125rem",
-              maxWidth: "500px",
-              width: "100%",
-              padding: "2rem",
-              position: "relative",
-              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-            }}
+            className="bg-white rounded-[1.125rem] max-w-[500px] w-full p-8 relative shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] animate-[fadeIn_0.2s_ease-out]"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => setActiveModalEvent(null)}
-              style={{
-                position: "absolute",
-                top: "1.25rem",
-                right: "1.25rem",
-                background: "var(--background)",
-                border: "none",
-                borderRadius: "50%",
-                width: "32px",
-                height: "32px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-              }}
+              className="absolute top-5 right-5 bg-[var(--background)] border-none rounded-full w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-[var(--border)] transition-colors"
             >
               <X size={18} />
             </button>
 
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.35rem",
-                padding: "0.25rem 0.75rem",
-                borderRadius: "9999px",
-                background: "rgba(6,163,236,0.1)",
-                color: "var(--primary-dark)",
-                fontSize: "0.75rem",
-                fontWeight: 700,
-                marginBottom: "0.75rem",
-              }}
-            >
-              <Sparkles size={12} /> Confirm Attendance
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[rgba(6,163,236,0.1)] text-[var(--primary-dark)] text-xs font-bold mb-3">
+              <Sparkles size={12} />
+              Confirm Attendance
             </span>
 
-            <h3 style={{ fontSize: "1.3rem", fontWeight: 800, color: "var(--text)", marginBottom: "0.5rem" }}>
+            <h3 className="text-[1.3rem] font-extrabold text-[var(--text)] mb-2">
               {activeModalEvent.title}
             </h3>
 
-            <div style={{ background: "var(--background)", padding: "1rem", borderRadius: "0.75rem", border: "1px solid var(--border)", marginBottom: "1.25rem" }}>
-              <div style={{ fontSize: "0.85rem", color: "var(--text)", fontWeight: 600, marginBottom: "0.35rem" }}>
-                📅 Date: {new Date(activeModalEvent.date).toLocaleDateString("en-BD", { day: "numeric", month: "long", year: "numeric" })} ({activeModalEvent.time})
+            <div className="bg-[var(--background)] p-4 rounded-xl border border-[var(--border)] mb-5">
+              <div className="text-sm text-[var(--text)] font-semibold mb-1.5">
+                📅 Date: {new Date(activeModalEvent.date).toLocaleDateString("en-BD", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric"
+                })} ({activeModalEvent.time})
               </div>
-              <div style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>
+              <div className="text-sm text-[var(--text-muted)]">
                 📍 Venue: {activeModalEvent.venue}
               </div>
             </div>
 
-            <p style={{ fontSize: "0.875rem", color: "var(--text-muted)", marginBottom: "1.5rem" }}>
-              Confirm your RSVP to receive schedule updates, entry instructions, and badge registration details.
+            <p className="text-sm text-[var(--text-muted)] mb-6">
+              Confirm your RSVP to receive schedule updates, entry instructions,
+              and badge registration details.
             </p>
 
-            <div style={{ display: "flex", gap: "0.75rem", justifyContent: "flex-end" }}>
+            <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setActiveModalEvent(null)}
-                style={{
-                  padding: "0.6rem 1.25rem",
-                  borderRadius: "0.5rem",
-                  border: "1px solid var(--border)",
-                  background: "white",
-                  fontSize: "0.85rem",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
+                className="px-5 py-2.5 rounded-lg border border-[var(--border)] bg-white text-sm font-semibold cursor-pointer hover:bg-[var(--background)] transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleRegister(activeModalEvent.id)}
-                className="btn-primary"
-                style={{ padding: "0.6rem 1.5rem", fontSize: "0.85rem" }}
+                className="px-6 py-2.5 rounded-lg bg-[var(--primary)] text-white text-sm font-semibold hover:opacity-90 hover:scale-[1.02] transition-all duration-200"
               >
                 Confirm RSVP
               </button>
@@ -398,6 +289,20 @@ export default function EventsPage() {
           </div>
         </div>
       )}
+
+      {/* Add animation keyframes */}
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+      `}</style>
     </>
   );
 }

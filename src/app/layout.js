@@ -145,15 +145,6 @@ export const metadata = {
 
   bookmarks: ["https://biddyasetu.org"],
 
-  colorScheme: "light",
-  themeColor: "#06A3EC",
-
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-  },
 
   formatDetection: {
     telephone: true,
@@ -179,6 +170,15 @@ export const metadata = {
     tileImage: "/mstile-144x144.png",
     tileColor: "#06A3EC",
   },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: "#06A3EC",
+  colorScheme: "light",
 };
 
 export default function RootLayout({ children }) {
