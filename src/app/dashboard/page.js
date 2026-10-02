@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import {
   LayoutDashboard,
   User,
@@ -38,18 +40,25 @@ import {
   BadgeCheck,
   Sparkles,
 } from "lucide-react";
+import api from "@/utility/config";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export default function MemberDashboardPage() {
+  const router = useRouter();
+  const { user, isAuthenticated, isLoading: isAuthLoading, updateProfile, changePassword, payMembership, logout } = useAuth();
+
   const [activeTab, setActiveTab] = useState("overview");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [idCardFlipped, setIdCardFlipped] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState("");
+  const [isPayingMembership, setIsPayingMembership] = useState(false);
+  const [subscriptionSuccessBanner, setSubscriptionSuccessBanner] = useState("");
 
   // Payment modal state
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentType, setPaymentType] = useState("Student Scholarship Fund Donation");
-  const [paymentAmount, setPaymentAmount] = useState("2000");
+  const [paymentAmount, setPaymentAmount] = useState("1000");
   const [paymentMethod, setPaymentMethod] = useState("bKash");
   const [transactionId, setTransactionId] = useState("");
   const [paymentSubmitted, setPaymentSubmitted] = useState(false);
@@ -65,125 +74,136 @@ export default function MemberDashboardPage() {
 
   // Member Profile State
   const [member, setMember] = useState({
-    name: "Engr. Tanvir Ahmed",
-    nameBn: "প্রকৌ. তানভীর আহমেদ",
-    memberId: "BDS-LM-0842",
-    tier: "Life Member",
-    status: "Active",
-    verified: true,
-    batch: "2006",
-    sscYear: "2006",
-    bloodGroup: "B+",
-    dob: "1990-04-15",
-    gender: "Male",
-    phone: "+880 1712-345678",
-    email: "tanvir.ahmed@example.com",
-    profession: "Principal Software Engineer",
-    company: "Grameenphone Ltd.",
-    education: "B.Sc. in Computer Science & Engineering (BUET)",
+    name: "Member",
+    nameBn: "",
+    memberId: "BDS-MEMBER",
+    tier: "General Member",
+    batch: "Alumni",
+    profession: "Alumnus",
+    company: "Independent",
+    education: "Adarsha High School, Kaitola",
     currentCity: "Dhaka",
     currentCountry: "Bangladesh",
-    presentAddress: "House 42, Road 11, Gulshan-2, Dhaka",
-    permanentAddress: "Kaitola Village, Nabinagar, Brahmanbaria",
-    emergencyContact: "Md. Rafiqul Islam (+880 1812-345678, Brother)",
-    joinDate: "17 February 2026",
-    validThru: "Lifetime",
-    totalContributions: 10500,
-    bio: "Proud alumnus of Adarsha High School, Kaitola (Batch 2006). Actively supporting school computer lab initiatives, student STEM scholarships, and organizing batch gatherings.",
+    presentAddress: "",
+    permanentAddress: "",
+    totalContributions: 0,
+    packageData: {
+      packageName: "General Member",
+      fee: 1000,
+    },
   });
+
+  
 
   // Edit form buffer
   const [editForm, setEditForm] = useState({ ...member });
 
+  // Sync with authenticated user
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("biddyasetu_member");
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          setMember((prev) => ({ ...prev, ...parsed }));
-          setEditForm((prev) => ({ ...prev, ...parsed }));
-        } catch (e) {
-          console.error(e);
-        }
-      }
+    if (!isAuthLoading && !isAuthenticated) {
+      router.push("/login");
+      return;
     }
-  }, []);
+
+    if (user) {
+      const formattedMember = {
+        name: user.name || "Member",
+        nameBn: user.nameBn || "",
+        memberId: user.membershipId || "BDS-MEMBER",
+        tier: user.membership
+          ? user.membership
+              .replace(/_/g, " ")
+              .replace(/\b\w/g, (l) => l.toUpperCase())
+          : "General Member",
+        status: user.membershipStatus
+          ? user.membershipStatus.charAt(0).toUpperCase() + user.membershipStatus.slice(1)
+          : "Active",
+        paymentStatus: user.paymentStatus || "unpaid",
+        membershipDuration: user.membershipDuration || "yearly",
+        membershipStartDate: user.membershipStartDate,
+        membershipEndDate: user.membershipEndDate,
+        packageData: user.packageData || {
+          packageName: user.membership?.includes("life") ? "Life Member" : "General Member",
+          fee: user.membership?.includes("life") ? 20000 : 1000,
+          currency: "BDT",
+          billingCycle: user.membership?.includes("life") ? "lifetime" : "yearly",
+        },
+        verified: true,
+        batch: user.batch || "Alumni",
+        sscYear: user.batch || "",
+        bloodGroup: user.bloodGroup || "N/A",
+        dob: user.dateOfBirth || "",
+        gender: user.gender
+          ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1)
+          : "Male",
+        phone: user.phone || "",
+        email: user.email || "",
+        profession: user.profession || "Alumnus",
+        company: user.organization || "Independent",
+        education: user.education || "Adarsha High School, Kaitola",
+        currentCity: user.currentAddress?.city || "Dhaka",
+        currentCountry: user.currentAddress?.country || "Bangladesh",
+        presentAddress:
+          typeof user.currentAddress === "object"
+            ? `${user.currentAddress?.line1 || ""} ${user.currentAddress?.city || ""} ${user.currentAddress?.country || ""}`.trim()
+            : user.currentAddress || "",
+        permanentAddress:
+          typeof user.permanentAddress === "object"
+            ? `${user.permanentAddress?.line1 || ""} ${user.permanentAddress?.upozilla || ""} ${user.permanentAddress?.division || ""}`.trim()
+            : user.permanentAddress || "",
+        emergencyContact: user.emergencyContact || "Alumni Support Desk (+880 1700-000000)",
+        joinDate: user.createdAt
+          ? new Date(user.createdAt).toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })
+          : "17 February 2026",
+        validThru: user.membershipDuration === "lifetime" ? "Lifetime" : "1 Year",
+        totalContributions: user.totalContributions || 5000,
+        bio: user.bio || "Proud alumnus of Adarsha High School, Kaitola.",
+      };
+
+      setMember(formattedMember);
+      setEditForm(formattedMember);
+    }
+  }, [user, isAuthenticated, isAuthLoading, router]);
+
+  
 
   // Payments History List
-  const [transactions, setTransactions] = useState([
-    {
-      id: "REC-2026-0842",
-      title: "Life Membership Enrollment Fee",
-      date: "17 Feb 2026",
-      method: "bKash (01712***)",
-      txnId: "BK78932401",
-      amount: 5000,
-      status: "Verified",
-    },
-    {
-      id: "REC-2026-1194",
-      title: "Annual Welfare Fund Contribution 2026",
-      date: "02 Apr 2026",
-      method: "Nagad (01712***)",
-      txnId: "NG54129870",
-      amount: 2000,
-      status: "Verified",
-    },
-    {
-      id: "REC-2026-1562",
-      title: "Merit Student Scholarship Fund Donation",
-      date: "15 May 2026",
-      method: "bKash (01712***)",
-      txnId: "BK90123455",
-      amount: 3500,
-      status: "Verified",
-    },
-  ]);
+  const [transactions, setTransactions] = useState([]);
 
   // Events RSVPs List
-  const [myEvents] = useState([
-    {
-      id: "EVT-01",
-      title: "Grand Annual Alumni Reunion 2026",
-      date: "Friday, 20 December 2026",
-      time: "09:00 AM - 06:00 PM",
-      venue: "School Premises, Adarsha High School, Kaitola",
-      ticketNo: "TKT-AR26-0842",
-      status: "Confirmed",
-      category: "Reunion",
-    },
-    {
-      id: "EVT-02",
-      title: "Alumni Cricket & Football Tournament 2026",
-      date: "Saturday, 15 November 2026",
-      time: "08:30 AM - 05:00 PM",
-      venue: "Kaitola Central Play Ground",
-      ticketNo: "TKT-SPT26-0419",
-      status: "Confirmed",
-      category: "Sports",
-    },
-    {
-      id: "EVT-03",
-      title: "Higher Education & Tech Career Mentorship",
-      date: "Friday, 12 October 2026",
-      time: "03:30 PM - 06:00 PM",
-      venue: "School Auditorium & Virtual Stream",
-      ticketNo: "TKT-MEN26-0112",
-      status: "Speaker / RSVP",
-      category: "Mentorship",
-    },
-  ]);
+  const [myEvents] = useState([]);
 
-  const handleProfileSave = (e) => {
+  const handleProfileSave = async (e) => {
     e.preventDefault();
-    setMember({ ...editForm });
-    setIsEditingProfile(false);
-    setSaveSuccessMsg("Profile information updated successfully!");
-    if (typeof window !== "undefined") {
-      localStorage.setItem("biddyasetu_member", JSON.stringify(editForm));
+    try {
+      await updateProfile({
+        name: editForm.name,
+        nameBn: editForm.nameBn,
+        email: editForm.email,
+        phone: editForm.phone,
+        profession: editForm.profession,
+        organization: editForm.company,
+        bloodGroup: editForm.bloodGroup,
+        gender: editForm.gender?.toLowerCase(),
+        dateOfBirth: editForm.dob,
+        bio: editForm.bio,
+      });
+
+      setMember({ ...editForm });
+      setIsEditingProfile(false);
+      setSaveSuccessMsg("Profile information updated successfully!");
+      if (typeof window !== "undefined") {
+        localStorage.setItem("biddyasetu_member", JSON.stringify(editForm));
+      }
+      setTimeout(() => setSaveSuccessMsg(""), 4000);
+    } catch (err) {
+      setSaveSuccessMsg(err.message || "Failed to update profile.");
+      setTimeout(() => setSaveSuccessMsg(""), 4000);
     }
-    setTimeout(() => setSaveSuccessMsg(""), 4000);
   };
 
   const handleNewPayment = (e) => {
@@ -213,8 +233,13 @@ export default function MemberDashboardPage() {
     }, 2000);
   };
 
-  const handlePasswordChange = (e) => {
+  
+  const handlePasswordChange = async (e) => {
     e.preventDefault();
+    if (!currentPassword) {
+      setPasswordMsg("Please enter your current password.");
+      return;
+    }
     if (newPassword.length < 6) {
       setPasswordMsg("New password must be at least 6 characters.");
       return;
@@ -223,12 +248,97 @@ export default function MemberDashboardPage() {
       setPasswordMsg("New passwords do not match.");
       return;
     }
-    setPasswordMsg("Password updated successfully!");
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-    setTimeout(() => setPasswordMsg(""), 4000);
+
+    try {
+      await changePassword({ currentPassword, newPassword });
+      setPasswordMsg("Password updated successfully!");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setTimeout(() => setPasswordMsg(""), 4000);
+    } catch (err) {
+      setPasswordMsg(err.message || "Failed to update password.");
+      setTimeout(() => setPasswordMsg(""), 4000);
+    }
   };
+
+  const handleDashboardLogout = async () => {
+    await logout();
+    router.push("/login");
+  };
+  const handleSSLPayment = async (paymentData, customAmount = null) => {
+    setIsPayingMembership(true);
+    try {
+      const targetFee =
+        customAmount ||
+        paymentData.packageData?.fee ||
+        (paymentData.membershipDuration === "lifetime" ? 20000 : 1000);
+
+      const targetPackage =
+        paymentData.packageData?.packageName ||
+        (paymentData.membershipDuration === "lifetime" ? "Life Member" : "General Member");
+
+      const payment = {
+        memberId: paymentData.membershipId || paymentData.memberId,
+        phone: paymentData.phone,
+        amount: targetFee,
+        packageName: targetPackage,
+      };
+
+      const result = await api.post("/ssl/init", payment);
+
+      if (result.data?.success && result.data?.data?.gatewayUrl) {
+        window.location.href = result.data.data.gatewayUrl;
+      } else {
+        alert(result.data?.message || "Payment gateway session could not be initialized.");
+        setIsPayingMembership(false);
+      }
+    } catch (error) {
+      console.error(
+        "SSL Payment Error:",
+        error.response?.data || error.message
+      );
+      alert(error.response?.data?.message || error.message || "Failed to connect to SSLCommerz gateway.");
+      setIsPayingMembership(false);
+    }
+  };
+
+  // Fetch real payment records from backend
+  useEffect(() => {
+    let isSubscribed = true;
+    const fetchPayments = async () => {
+      try {
+        const res = await api.get("/ssl/my-payments");
+        if (isSubscribed && res.data?.success && Array.isArray(res.data?.data) && res.data.data.length > 0) {
+          const formatted = res.data.data.map((p) => ({
+            id: p.transactionId,
+            title: `${p.packageName || "Membership"} Subscription Fee`,
+            date: new Date(p.paidAt || p.createdAt).toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            }),
+            method: `${p.cardType || p.paymentGateway || "SSLCommerz"} ${p.bankTransactionId ? `(Txn: ${p.bankTransactionId})` : ""}`.trim(),
+            txnId: p.transactionId,
+            amount: p.amount,
+            status: p.status === "paid" ? "Verified" : p.status === "pending" ? "Pending Verification" : "Failed",
+            rawStatus: p.status,
+          }));
+          setTransactions(formatted);
+        }
+      } catch (err) {
+        // Silently preserve existing list on network issue
+      }
+    };
+
+    if (user) {
+      fetchPayments();
+    }
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [user]);
 
   const navItems = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -240,7 +350,8 @@ export default function MemberDashboardPage() {
   ];
 
   return (
-    <div className="min-h-[calc(100vh-76px)] bg-[#FDF9DF]/40 text-slate-800 flex flex-col">
+    <ProtectedRoute requireAuth={true}>
+      <div className="min-h-[calc(100vh-76px)] bg-[#FDF9DF]/40 text-slate-800 flex flex-col">
       {/* In-page Mobile Top Bar (Sticky below Navbar at top-[76px]) */}
       <div className="lg:hidden bg-white/95 backdrop-blur-md border-b border-sky-100/80 px-4 py-3 flex items-center justify-between sticky top-[76px] z-20 shadow-xs">
         <button
@@ -350,6 +461,8 @@ export default function MemberDashboardPage() {
                 </button>
               );
             })}
+
+           
           </div>
 
           {/* Sidebar Footer Links */}
@@ -362,13 +475,14 @@ export default function MemberDashboardPage() {
               <span>Back to Public Website</span>
             </Link>
 
-            <Link
-              href="/login"
-              className="w-full flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors"
+            <button
+              type="button"
+              onClick={handleDashboardLogout}
+              className="w-full flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
             >
               <LogOut className="w-4 h-4 text-rose-500" />
               <span>Sign Out of Portal</span>
-            </Link>
+            </button>
           </div>
         </aside>
 
@@ -420,7 +534,7 @@ export default function MemberDashboardPage() {
             </div>
           </div>
 
-          {/* Success Flash Notification */}
+          {/* Success Flash Notifications */}
           {saveSuccessMsg && (
             <div className="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-bold flex items-center gap-2.5 shadow-sm animate-fadeIn">
               <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
@@ -428,11 +542,55 @@ export default function MemberDashboardPage() {
             </div>
           )}
 
+          {subscriptionSuccessBanner && (
+            <div className="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-bold flex items-center gap-2.5 shadow-sm animate-fadeIn">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+              <span>{subscriptionSuccessBanner}</span>
+            </div>
+          )}
+
           {/* TAB 1: OVERVIEW */}
           {activeTab === "overview" && (
             <div className="space-y-6">
+              {/* Unpaid Subscription Alert Banner if paymentStatus is not paid */}
+              {member.paymentStatus !== "paid" && (
+                <div className="p-5 rounded-3xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-2 border-amber-300/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+                  <div className="flex items-start gap-3.5">
+                    <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
+                      <AlertCircle className="w-5 h-5 text-amber-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                        <span>Membership Subscription Unpaid</span>
+                        <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded bg-amber-200 text-amber-900">
+                          {member.packageData?.packageName || member.tier}
+                        </span>
+                      </h4>
+                      <p className="text-xs text-slate-600 leading-relaxed mt-0.5">
+                        Your account is currently unpaid. Yearly membership validity is 1 year (resets to unpaid after 12 months). Pay now to activate full alumni privileges.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                   onClick={()=>handleSSLPayment(member)}
+                    disabled={isPayingMembership}
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-linear-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-900 font-extrabold text-xs shadow-md transition-all shrink-0 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                  >
+                    {isPayingMembership ? (
+                      <span className="animate-pulse">Processing...</span>
+                    ) : (
+                      <>
+                        <CreditCard className="w-4 h-4" />
+                        <span>Pay ৳{member.packageData?.fee ? member.packageData.fee.toLocaleString() : (member.membershipDuration === "lifetime" ? "20,000" : "1,000")} Fee</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+
               {/* Hero Welcome Banner */}
-              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-sky-600 via-sky-500 to-sky-700 text-white p-6 sm:p-8 shadow-xl shadow-sky-900/10">
+              <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-sky-600 via-sky-500 to-sky-700 text-white p-6 sm:p-8 shadow-xl shadow-sky-900/10">
                 <div
                   className="absolute inset-0 opacity-15 pointer-events-none"
                   style={{
@@ -554,7 +712,7 @@ export default function MemberDashboardPage() {
                           </div>
                         </div>
                         <span className="text-[9px] font-extrabold px-1.5 py-0.5 bg-yellow-400 text-slate-900 rounded">
-                          LIFE
+                          {member.packageData.packageName}
                         </span>
                       </div>
 
@@ -721,18 +879,7 @@ export default function MemberDashboardPage() {
                         className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium disabled:bg-slate-50 disabled:text-slate-700 focus:outline-none focus:border-sky-500"
                       />
                     </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">
-                        Name (Bengali)
-                      </label>
-                      <input
-                        type="text"
-                        disabled={!isEditingProfile}
-                        value={editForm.nameBn}
-                        onChange={(e) => setEditForm({ ...editForm, nameBn: e.target.value })}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium disabled:bg-slate-50 disabled:text-slate-700 focus:outline-none focus:border-sky-500"
-                      />
-                    </div>
+                   
                     <div>
                       <label className="block text-xs font-semibold text-slate-600 mb-1">
                         Blood Group
@@ -938,7 +1085,7 @@ export default function MemberDashboardPage() {
                   <div className="w-full max-w-md perspective-1000">
                     {!idCardFlipped ? (
                       /* CARD FRONT */
-                      <div className="w-full aspect-[1.58/1] rounded-3xl bg-gradient-to-br from-[#0c2d48] via-[#145374] to-[#0c2d48] text-white p-6 shadow-2xl border-2 border-sky-400/40 relative overflow-hidden flex flex-col justify-between">
+                      <div className="w-full aspect-[1.58/1] rounded-3xl bg-linear-to-br from-[#0c2d48] via-[#145374] to-[#0c2d48] text-white p-6 shadow-2xl border-2 border-sky-400/40 relative overflow-hidden flex flex-col justify-between">
                         {/* Background Holographic Ring Pattern */}
                         <div
                           className="absolute -right-16 -bottom-16 w-56 h-56 bg-sky-400/10 rounded-full blur-xl pointer-events-none"
@@ -970,7 +1117,7 @@ export default function MemberDashboardPage() {
                           </div>
 
                           <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-900 shadow-xs">
-                            Life Member
+                            {member.packageData.packageName}
                           </span>
                         </div>
 
@@ -1022,7 +1169,7 @@ export default function MemberDashboardPage() {
                             <div className="text-[9px] uppercase tracking-wider text-sky-300 font-sans font-bold">
                               Validity
                             </div>
-                            <div className="text-white font-bold text-xs">Lifetime</div>
+                            <div className="text-white font-bold text-xs">{member.packageData.packageName}</div>
                           </div>
 
                           <div className="w-10 h-10 bg-white rounded-lg p-1 shrink-0 shadow-xs">
@@ -1107,6 +1254,8 @@ export default function MemberDashboardPage() {
             </div>
           )}
 
+          
+
           {/* TAB 4: PAYMENTS & DUES */}
           {activeTab === "payment" && (
             <div className="space-y-6">
@@ -1124,26 +1273,109 @@ export default function MemberDashboardPage() {
 
                 <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
                   <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
-                    Annual Dues Status
+                    Subscription Status
                   </div>
-                  <div className="text-2xl font-black text-emerald-600">Cleared (2026)</div>
-                  <p className="text-xs text-slate-500 font-medium mt-1">Next due: Lifetime Member</p>
+                  <div className={`text-xl font-black ${member.paymentStatus === "paid" ? "text-emerald-600" : "text-rose-600"}`}>
+                    {member.paymentStatus === "paid" ? "Active (Paid)" : "Unpaid (Pending)"}
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium mt-1">
+                    {member.membershipDuration === "lifetime"
+                      ? "Lifetime Member · Permanent"
+                      : member.paymentStatus === "paid" && member.membershipEndDate
+                      ? `Valid until: ${new Date(member.membershipEndDate).toLocaleDateString("en-GB")}`
+                      : "Yearly member · Unpaid after 1 year"}
+                  </p>
                 </div>
 
                 <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
                   <div>
                     <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
-                      Pay / Donate
+                      {member.paymentStatus === "paid" ? "Support / Donate" : "Membership Dues"}
                     </div>
-                    <div className="text-sm font-bold text-slate-800">Support Scholarships</div>
+                    <div className="text-sm font-bold text-slate-800">
+                      {member.paymentStatus === "paid" ? "Scholarship Fund" : `৳${member.packageData?.fee || (member.membershipDuration === "lifetime" ? 20000 : 1000)} Due`}
+                    </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowPaymentModal(true)}
-                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold text-xs shadow-md shadow-sky-500/20 transition-all flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Plus className="w-4 h-4" /> Make Payment
-                  </button>
+                  {member.paymentStatus !== "paid" ? (
+                    <button
+                      type="button"
+                      onClick={() => handleSSLPayment(member)}
+                      disabled={isPayingMembership}
+                      className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-900 font-bold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
+                    >
+                      {isPayingMembership ? (
+                        <span className="animate-pulse">Connecting Gateway...</span>
+                      ) : (
+                        <>
+                          <CreditCard className="w-4 h-4" /> Pay Dues Now
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setShowPaymentModal(true)}
+                      className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold text-xs shadow-md shadow-sky-500/20 transition-all flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Plus className="w-4 h-4" /> Donate Extra
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Membership Subscription Package Card */}
+              <div className="bg-gradient-to-br from-white via-sky-50/40 to-white rounded-3xl border-2 border-sky-100 p-6 shadow-xs">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-sky-100">
+                  <div>
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-sky-700 bg-sky-100 px-3 py-1 rounded-full">
+                      Enrolled Package Details
+                    </span>
+                    <h3 className="text-lg font-black text-slate-900 mt-2">
+                      {member.packageData?.packageName || member.tier}
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {member.membershipDuration === "lifetime"
+                        ? "One-time contribution for permanent lifetime membership"
+                        : "Yearly subscription renews annually. Payment status becomes unpaid after 1 year."}
+                    </p>
+                  </div>
+                  <div className="text-left sm:text-right">
+                    <div className="text-2xl font-black text-sky-800">
+                      ৳{member.packageData?.fee ? member.packageData.fee.toLocaleString() : (member.membershipDuration === "lifetime" ? "20,000" : "1,000")}
+                    </div>
+                    <div className="text-xs font-bold text-slate-500">
+                      {member.membershipDuration === "lifetime" ? "Lifetime Access" : "Yearly Validity (1 Year)"}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 text-xs">
+                  <div className="p-3 bg-white rounded-xl border border-slate-200/70">
+                    <span className="text-slate-400 font-medium block mb-0.5">Payment Status</span>
+                    <span className={`font-bold inline-flex items-center gap-1 uppercase ${
+                      member.paymentStatus === "paid" ? "text-emerald-600" : "text-rose-600"
+                    }`}>
+                      {member.paymentStatus === "paid" ? "✓ Paid & Verified" : "⚠ Unpaid (Payment Due)"}
+                    </span>
+                  </div>
+
+                  <div className="p-3 bg-white rounded-xl border border-slate-200/70">
+                    <span className="text-slate-400 font-medium block mb-0.5">Validity Duration</span>
+                    <span className="font-bold text-slate-800">
+                      {member.membershipDuration === "lifetime" ? "Lifetime Access" : "1 Year (Annual Renewal)"}
+                    </span>
+                  </div>
+
+                  <div className="p-3 bg-white rounded-xl border border-slate-200/70">
+                    <span className="text-slate-400 font-medium block mb-0.5">Expiration / Renewal</span>
+                    <span className="font-bold text-slate-800">
+                      {member.membershipDuration === "lifetime"
+                        ? "Never Expires"
+                        : member.membershipEndDate
+                        ? new Date(member.membershipEndDate).toLocaleDateString("en-GB")
+                        : "1 Year from payment"}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -1582,5 +1814,6 @@ export default function MemberDashboardPage() {
         </div>
       )}
     </div>
+  </ProtectedRoute>
   );
 }

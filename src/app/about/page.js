@@ -66,7 +66,7 @@ export default function AboutPage() {
   return (
     <>
       {/* Hero Banner with Enhanced Gradient */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#0284c7] via-[#06A3EC] to-[#38bdf8] py-20 px-6 text-center text-white">
+      <section className="relative overflow-hidden bg-linear-to-br from-[#0284c7] via-[#06A3EC] to-[#38bdf8] py-20 px-6 text-center text-white">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
           <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#fde047]/10 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3" />
@@ -77,14 +77,14 @@ export default function AboutPage() {
             }}
           />
         </div>
-        <div className="max-w-[820px] mx-auto relative z-10">
+        <div className="max-w-205 mx-auto relative z-10">
           <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/20 border border-white/30 text-[0.8125rem] font-semibold mb-4 backdrop-blur-sm">
             <Sparkles size={14} color="#fde047" /> Est. 17 February 2026 · Non-profit
           </span>
           <h1 className="text-[clamp(2.5rem,6vw,3.8rem)] font-black mb-4 tracking-tight leading-[1.1]">
             About Biddyasetu
           </h1>
-          <p className="text-lg md:text-xl opacity-95 leading-relaxed max-w-[600px] mx-auto font-light">
+          <p className="text-lg md:text-xl opacity-95 leading-relaxed max-w-150 mx-auto font-light">
             The official alumni and student welfare organization of <span className="font-semibold">Adarsha High School, Kaitola</span>
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 mt-8">
@@ -128,7 +128,7 @@ export default function AboutPage() {
                 Operating across <strong className="text-slate-900">Bangladesh and internationally</strong>, we empower students through scholarships, emergency aid, school development projects, and networking reunions.
               </p>
               <div className="flex flex-wrap gap-3">
-                <Link href="/membership" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold text-sm shadow-md shadow-sky-500/25 hover:shadow-lg hover:shadow-sky-500/40 hover:-translate-y-0.5 transition-all duration-300">
+                <Link href="/membership" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-linear-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold text-sm shadow-md shadow-sky-500/25 hover:shadow-lg hover:shadow-sky-500/40 hover:-translate-y-0.5 transition-all duration-300">
                   Join Biddyasetu <ArrowRight size={15} />
                 </Link>
                 <Link href="/structure" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white border-2 border-slate-200 hover:border-sky-400 text-slate-700 hover:text-sky-600 font-semibold text-sm transition-all hover:shadow-md">
@@ -140,7 +140,7 @@ export default function AboutPage() {
             {/* Quick facts card - Enhanced */}
             <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-xl shadow-slate-900/5">
               <div className="flex items-center gap-2.5 mb-6">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-sky-50 to-sky-100">
+                <div className="p-2 rounded-lg bg-linear-to-br from-sky-50 to-sky-100">
                   <Building size={20} className="text-sky-600" />
                 </div>
                 <h3 className="font-extrabold text-xl text-slate-900">

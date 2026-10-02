@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import AppProviders from "@/providers/AppProviders";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -311,9 +312,11 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-        <Navbar />
-        <main style={{ flex: 1 }}>{children}</main>
-        <Footer />
+        <AppProviders>
+          <Navbar />
+          <main style={{ flex: 1 }}>{children}</main>
+          <Footer />
+        </AppProviders>
       </body>
     </html>
   );

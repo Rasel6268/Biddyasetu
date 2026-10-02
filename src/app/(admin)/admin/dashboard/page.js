@@ -46,77 +46,11 @@ export default function AdminDashboardOverview() {
 
   // Mock Approvals Queue
   const [pendingMembers, setPendingMembers] = useState([
-    {
-      id: "BDS-PN-1044",
-      name: "S.M. Nahid Hasan",
-      batch: "2015",
-      phone: "+880 1911-778899",
-      email: "nahid.hasan@example.com",
-      profession: "Civil Engineer",
-      joinedDate: "Yesterday",
-    },
-    {
-      id: "BDS-PN-1045",
-      name: "Kazi Nusrat Jahan",
-      batch: "2018",
-      phone: "+880 1622-334455",
-      email: "nusrat.jahan@example.com",
-      profession: "Research Associate",
-      joinedDate: "Today",
-    },
-    {
-      id: "BDS-PN-1046",
-      name: "Tariqul Islam Rifat",
-      batch: "2020",
-      phone: "+880 1300-112233",
-      email: "rifat.islam@example.com",
-      profession: "Software Engineer",
-      joinedDate: "Today",
-    },
   ]);
 
   // Mock Payments Queue
   const [recentPayments, setRecentPayments] = useState([
-    {
-      id: "TXN-2026-9941",
-      member: "S.M. Nahid Hasan",
-      memberId: "BDS-PN-1044",
-      type: "Annual Membership Fee",
-      amount: 1000,
-      gateway: "bKash",
-      trxId: "BK9A87X021",
-      status: "Pending Verification",
-    },
-    {
-      id: "TXN-2026-9940",
-      member: "Kazi Nusrat Jahan",
-      memberId: "BDS-PN-1045",
-      type: "Annual Membership Fee",
-      amount: 1000,
-      gateway: "Nagad",
-      trxId: "NG88219401",
-      status: "Pending Verification",
-    },
-    {
-      id: "TXN-2026-9938",
-      member: "Engr. Tanvir Ahmed",
-      memberId: "BDS-LM-0842",
-      type: "Student Scholarship Fund Donation",
-      amount: 5000,
-      gateway: "bKash",
-      trxId: "BK77109283",
-      status: "Verified",
-    },
-    {
-      id: "TXN-2026-9935",
-      member: "Md. Rafiqul Islam",
-      memberId: "BDS-LM-0102",
-      type: "School Library & Science Lab Aid",
-      amount: 50000,
-      gateway: "Bank Transfer",
-      trxId: "EBL-ONL-847291",
-      status: "Verified",
-    },
+
   ]);
 
   const handleApprove = (id) => {
@@ -422,8 +356,8 @@ export default function AdminDashboardOverview() {
                   <td className="py-3.5">
                     <span
                       className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${p.status === "Verified"
-                          ? "bg-emerald-100 text-emerald-800"
-                          : "bg-amber-100 text-amber-800"
+                        ? "bg-emerald-100 text-emerald-800"
+                        : "bg-amber-100 text-amber-800"
                         }`}
                     >
                       {p.status}

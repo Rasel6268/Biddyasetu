@@ -3,6 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import {
   Menu,
   X,
@@ -21,10 +23,29 @@ import {
 } from "lucide-react";
 
 export default function AdminNavbar({ mobileSidebarOpen, setMobileSidebarOpen }) {
+  const router = useRouter();
+  const { user, logout } = useAuth();
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const userDropdownRef = useRef(null);
   const notificationRef = useRef(null);
+
+  const adminName = user?.name || "Super Admin";
+  const adminInitials = user?.name
+    ? user.name
+        .split(" ")
+        .filter(Boolean)
+        .map((n) => n[0])
+        .slice(0, 2)
+        .join("")
+        .toUpperCase()
+    : "SA";
+
+  const handleAdminLogout = async () => {
+    setUserDropdownOpen(false);
+    await logout();
+    router.push("/login");
+  };
 
   // Close dropdowns on click outside
   useEffect(() => {
@@ -166,11 +187,11 @@ export default function AdminNavbar({ mobileSidebarOpen, setMobileSidebarOpen })
               className="flex items-center gap-2 p-1.5 pr-2.5 rounded-xl bg-slate-800 hover:bg-slate-750 border border-slate-700 transition-colors cursor-pointer"
             >
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-rose-500 to-red-600 text-white font-black text-xs flex items-center justify-center shadow-xs">
-                SA
+                {adminInitials}
               </div>
               <div className="text-left hidden xl:block leading-tight">
-                <div className="font-bold text-xs text-white">Super Admin</div>
-                <div className="text-[10px] text-rose-400 font-medium">Full Access</div>
+                <div className="font-bold text-xs text-white truncate max-w-[120px]">{adminName}</div>
+                <div className="text-[10px] text-rose-400 font-medium">Administrator</div>
               </div>
               <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
             </button>
@@ -178,8 +199,8 @@ export default function AdminNavbar({ mobileSidebarOpen, setMobileSidebarOpen })
             {userDropdownOpen && (
               <div className="absolute right-0 top-full mt-2 w-64 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-2 z-[110] text-xs font-semibold text-slate-300 animate-fadeIn">
                 <div className="p-3 bg-slate-800/80 rounded-xl mb-2 border border-slate-700/60">
-                  <div className="font-bold text-white text-sm">Md. Rafiqul Islam</div>
-                  <div className="text-[11px] text-slate-400">President & Root Admin</div>
+                  <div className="font-bold text-white text-sm truncate">{adminName}</div>
+                  <div className="text-[11px] text-slate-400">Authenticated Administrator</div>
                   <span className="inline-flex items-center gap-1 mt-2 text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">
                     <ShieldCheck className="w-3 h-3 text-emerald-400" /> Authorized Console
                   </span>
@@ -204,14 +225,14 @@ export default function AdminNavbar({ mobileSidebarOpen, setMobileSidebarOpen })
                 </Link>
 
                 <div className="pt-2 mt-1 border-t border-slate-800">
-                  <Link
-                    href="/login"
-                    onClick={() => setUserDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-500/10 transition-colors"
+                  <button
+                    type="button"
+                    onClick={handleAdminLogout}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
                   >
                     <LogOut className="w-4 h-4 text-rose-500" />
                     <span>Sign Out Admin</span>
-                  </Link>
+                  </button>
                 </div>
               </div>
             )}

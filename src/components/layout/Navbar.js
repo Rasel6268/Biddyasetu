@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
+import { useAuth } from "@/context/AuthContext";
 import {
   Menu,
   X,
@@ -37,7 +38,7 @@ const navLinks = [
 
 export default function Navbar() {
   const pathname = usePathname();
-  const [isAuth, setIsAuth] = useState(true); // Default to true as requested
+  const { user, isAuthenticated, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -50,14 +51,27 @@ export default function Navbar() {
     return null;
   }
 
-  // Mock authenticated user data (to be replaced with backend auth)
+  // Derive display values from authenticated user
   const authUser = {
-    name: "Engr. Tanvir Ahmed",
-    email: "tanvir.ahmed@example.com",
-    batch: "2006",
-    tier: "Life Member",
-    memberId: "BDS-LM-0842",
-    initials: "TA",
+    name: user?.name || "Member",
+    email: user?.email || user?.phone || "",
+    batch: user?.batch || "Alumni",
+    tier: user?.membership
+      ? user.membership
+          .replace(/_/g, " ")
+          .replace(/\b\w/g, (l) => l.toUpperCase())
+      : "General Member",
+    memberId: user?.membershipId || "BDS-MEMBER",
+    initials: user?.name
+      ? user.name
+          .split(" ")
+          .filter(Boolean)
+          .map((n) => n[0])
+          .slice(0, 2)
+          .join("")
+          .toUpperCase()
+      : "U",
+    isAdmin: user?.role === "admin",
   };
 
   useEffect(() => {
@@ -183,8 +197,8 @@ export default function Navbar() {
 
           {/* Desktop Right Actions: Auth State Switch */}
           <div className="hidden lg:flex items-center gap-3">
-            {isAuth ? (
-              /* AUTHENTICATED: Avatar with Dropdown */
+            {isAuthenticated ? (
+             
               <div className="relative" ref={userDropdownRef}>
                 <button
                   type="button"
@@ -214,7 +228,7 @@ export default function Navbar() {
                       <BadgeCheck className="w-3.5 h-3.5 text-sky-600" />
                     </div>
                     <span className="text-[10px] font-bold text-sky-600">
-                      Batch &apos;{authUser.batch.slice(2)}
+                      Batch {authUser.batch ? `'${authUser.batch.slice(-2)}` : "Alumni"}
                     </span>
                   </div>
 
@@ -249,17 +263,19 @@ export default function Navbar() {
 
                     {/* Dropdown Menu Items */}
                     <div className="space-y-0.5 text-xs font-semibold text-slate-700">
-                      <Link
-                        href="/admin/dashboard"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-gradient-to-r from-rose-50 to-orange-50 text-rose-700 hover:from-rose-100 hover:to-orange-100 font-bold transition-colors border border-rose-100/80 mb-1"
-                      >
-                        <ShieldCheck className="w-4 h-4 text-rose-600" />
-                        <span className="flex-1">Admin Portal</span>
-                        <span className="text-[9px] uppercase px-1.5 py-0.5 bg-rose-600 text-white rounded font-extrabold">
-                          Root
-                        </span>
-                      </Link>
+                      {authUser.isAdmin && (
+                        <Link
+                          href="/admin/dashboard"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-gradient-to-r from-rose-50 to-orange-50 text-rose-700 hover:from-rose-100 hover:to-orange-100 font-bold transition-colors border border-rose-100/80 mb-1"
+                        >
+                          <ShieldCheck className="w-4 h-4 text-rose-600" />
+                          <span className="flex-1">Admin Portal</span>
+                          <span className="text-[9px] uppercase px-1.5 py-0.5 bg-rose-600 text-white rounded font-extrabold">
+                            Admin
+                          </span>
+                        </Link>
+                      )}
 
                       <Link
                         href="/dashboard"
@@ -298,12 +314,12 @@ export default function Navbar() {
                       </Link>
 
                       <Link
-                        href="/dashboard"
+                        href="/events"
                         onClick={() => setUserDropdownOpen(false)}
                         className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-sky-50 hover:text-sky-700 transition-colors"
                       >
                         <Calendar className="w-4 h-4 text-slate-500" />
-                        <span>My Events</span>
+                        <span>Events</span>
                       </Link>
                     </div>
 
@@ -311,9 +327,9 @@ export default function Navbar() {
                     <div className="pt-2 mt-1.5 border-t border-slate-100">
                       <button
                         type="button"
-                        onClick={() => {
-                          setIsAuth(false);
+                        onClick={async () => {
                           setUserDropdownOpen(false);
+                          await logout();
                         }}
                         className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                       >
@@ -348,7 +364,7 @@ export default function Navbar() {
 
           {/* Mobile Hamburger Button */}
           <div className="flex items-center gap-2 lg:hidden">
-            {isAuth ? (
+            {isAuthenticated ? (
               <Link
                 href="/dashboard"
                 className="w-9 h-9 rounded-xl bg-sky-600 text-white font-black text-xs flex items-center justify-center shadow-xs"
@@ -394,7 +410,7 @@ export default function Navbar() {
 
             {/* Mobile Auth Section */}
             <div className="pt-4 mt-3 border-t border-slate-100 space-y-3">
-              {isAuth ? (
+              {isAuthenticated ? (
                 <div className="space-y-2">
                   <div className="p-3.5 bg-sky-50/80 rounded-2xl border border-sky-100 flex items-center justify-between">
                     <div>
@@ -408,14 +424,16 @@ export default function Navbar() {
                     </span>
                   </div>
 
-                  <Link
-                    href="/admin"
-                    onClick={() => setMobileOpen(false)}
-                    className="w-full flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs shadow-md transition-all border border-slate-700"
-                  >
-                    <ShieldCheck className="w-4 h-4 text-rose-400" />
-                    Open Admin Console
-                  </Link>
+                  {authUser.isAdmin && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setMobileOpen(false)}
+                      className="w-full flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs shadow-md transition-all border border-slate-700"
+                    >
+                      <ShieldCheck className="w-4 h-4 text-rose-400" />
+                      Open Admin Console
+                    </Link>
+                  )}
 
                   <Link
                     href="/dashboard"
@@ -428,9 +446,9 @@ export default function Navbar() {
 
                   <button
                     type="button"
-                    onClick={() => {
-                      setIsAuth(false);
+                    onClick={async () => {
                       setMobileOpen(false);
+                      await logout();
                     }}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-rose-200 text-rose-600 font-bold text-xs hover:bg-rose-50 transition-all"
                   >

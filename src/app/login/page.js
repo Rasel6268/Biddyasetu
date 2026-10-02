@@ -1,140 +1,119 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { countryDialCodes } from "@/lib/data/countries";
+import { showSuccess, showError } from "@/utility/toast";
 import {
   Phone,
-  Lock,
-  Eye,
-  EyeOff,
   ArrowRight,
   CheckCircle2,
   AlertCircle,
   ShieldCheck,
   Sparkles,
-  KeyRound,
   Users,
   GraduationCap,
-  HelpCircle,
-  X,
-  Send,
   UserCheck,
   LogOut,
-  ChevronRight,
-  ChevronDown,
   Globe,
   LayoutDashboard,
+  ChevronDown
 } from "lucide-react";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const {
+    user,
+    isAuthenticated,
+    login,
+    logout,
+  } = useAuth();
+
   const [countryCode, setCountryCode] = useState("+880");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [loggedInUser, setLoggedInUser] = useState(null);
-
-  // Forgot password modal state
-  const [showForgotModal, setShowForgotModal] = useState(false);
-  const [forgotCountryCode, setForgotCountryCode] = useState("+880");
-  const [forgotPhone, setForgotPhone] = useState("");
-  const [forgotStep, setForgotStep] = useState(1); // 1: enter phone, 2: enter otp, 3: success
-  const [otpCode, setOtpCode] = useState("");
-  const [forgotMsg, setForgotMsg] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const activeCountry =
     countryDialCodes.find((c) => c.code === countryCode) || countryDialCodes[0];
-  const activeForgotCountry =
-    countryDialCodes.find((c) => c.code === forgotCountryCode) || countryDialCodes[0];
 
-  const handleDemoFill = () => {
-    setCountryCode("+880");
-    setPhoneNumber("01712345678");
-    setPassword("biddyasetu2026");
-    setErrorMessage("");
-  };
+  // Auto redirect if user is logged in
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const timer = setTimeout(() => {
+        if (user.role === "admin") {
+          router.push("/admin/dashboard");
+        } else {
+          router.push("/dashboard");
+        }
+      }, 1200);
+      return () => clearTimeout(timer);
+    }
+  }, [isAuthenticated, user, router]);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMessage("");
+    setSuccessMessage("");
 
-    const cleanPhone = phoneNumber.replace(/[\s\-()]/g, "");
+    const cleanInput = phoneNumber.trim();
 
-    // Basic validation
-    if (!cleanPhone) {
+    // Validation
+    if (!cleanInput) {
       setErrorMessage("Please enter your registered phone number.");
+      showError("Please enter your registered phone number.");
       return;
     }
 
-    if (cleanPhone.length < 6) {
-      setErrorMessage("Please enter a valid mobile number for " + activeCountry.name + ".");
+    // Only allow phone number (no email)
+    if (cleanInput.includes("@")) {
+      setErrorMessage("Please enter your phone number only.");
+      showError("Please enter your phone number only.");
       return;
     }
 
-    if (!password) {
-      setErrorMessage("Please enter your password.");
-      return;
+    // Build identifier — send with country code; backend strips it anyway
+    const digitsOnly = cleanInput.replace(/[\s\-()]/g, "").replace(/^\+/, "");
+    const identifier = `${countryCode.replace("+", "")}${digitsOnly}`;
+
+    setIsSubmitting(true);
+
+    try {
+      const result = await login({ identifier });
+
+      const successMsg =
+        result.message || "Logged in successfully! Redirecting...";
+      setSuccessMessage(successMsg);
+      showSuccess(successMsg);
+
+      setTimeout(() => {
+        if (result.user?.role === "admin") {
+          router.push("/admin/dashboard");
+        } else {
+          router.push("/dashboard");
+        }
+      }, 800);
+    } catch (error) {
+      console.error("Login failed:", error);
+      const errText =
+        error.message ||
+        "No account found with this phone number. Please register first.";
+      setErrorMessage(errText);
+      showError(errText);
+    } finally {
+      setIsSubmitting(false);
     }
-
-    if (password.length < 6) {
-      setErrorMessage("Password must be at least 6 characters.");
-      return;
-    }
-
-    setIsLoading(true);
-
-    // Simulate API authentication delay
-    setTimeout(() => {
-      setIsLoading(false);
-      setLoggedInUser({
-        name: "Engr. Tanvir Ahmed",
-        country: activeCountry.name,
-        flag: activeCountry.flag,
-        phone: `${countryCode} ${cleanPhone}`,
-        batch: "2006",
-        tier: "Life Member",
-        memberId: "BS-LM-0842",
-      });
-    }, 750);
   };
 
-  const handleLogout = () => {
-    setLoggedInUser(null);
-    setPassword("");
+  const handleLogout = async () => {
+    await logout();
+    setPhoneNumber("");
     setErrorMessage("");
-  };
-
-  const handleSendOtp = (e) => {
-    e.preventDefault();
-    const cleanPhone = forgotPhone.replace(/[\s\-()]/g, "");
-    if (!cleanPhone || cleanPhone.length < 6) {
-      setForgotMsg("Please enter a valid mobile phone number.");
-      return;
-    }
-    setForgotMsg("");
-    setForgotStep(2);
-  };
-
-  const handleVerifyOtp = (e) => {
-    e.preventDefault();
-    if (otpCode.length < 4) {
-      setForgotMsg("Please enter the 4-digit code sent via SMS.");
-      return;
-    }
-    setForgotMsg("");
-    setForgotStep(3);
-  };
-
-  const closeForgotModal = () => {
-    setShowForgotModal(false);
-    setForgotStep(1);
-    setForgotPhone("");
-    setOtpCode("");
-    setForgotMsg("");
+    setSuccessMessage("");
   };
 
   return (
@@ -152,7 +131,10 @@ export default function LoginPage() {
       <div className="relative max-w-lg w-full mx-auto">
         {/* Brand Header */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-3.5 group mb-4 no-underline">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-3.5 group mb-4 no-underline"
+          >
             <div className="relative">
               <div className="w-14 h-14 rounded-2xl bg-white p-1 border-2 border-sky-200 shadow-lg shadow-sky-500/10 group-hover:border-sky-400 group-hover:scale-105 transition-all duration-300 flex items-center justify-center">
                 <Image
@@ -184,26 +166,29 @@ export default function LoginPage() {
             Alumni Portal Login
           </h1>
           <p className="text-slate-600 text-sm max-w-md mx-auto">
-            Sign in with your phone number and password. Domestic and international alumni members can select their country dialing code.
+            Sign in with your registered phone number. No password needed —
+            we&apos;ll recognize you instantly.
           </p>
         </div>
 
-        {/* If user is logged in (simulated state) */}
-        {loggedInUser ? (
+        {/* If user is already authenticated */}
+        {isAuthenticated && user ? (
           <div className="bg-white/95 backdrop-blur-md border-[1.5px] border-sky-100 rounded-3xl p-7 sm:p-9 shadow-xl shadow-sky-900/10 text-center animate-fadeIn">
             <div className="w-20 h-20 rounded-full bg-emerald-50 border-4 border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto mb-4 shadow-md shadow-emerald-500/10">
               <UserCheck className="w-10 h-10" />
             </div>
 
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold mb-3">
-              <CheckCircle2 className="w-3.5 h-3.5" /> Authentication Successful
+              <CheckCircle2 className="w-3.5 h-3.5" /> Authentication
+              Successful
             </span>
 
             <h2 className="text-2xl font-black text-slate-900 mb-1">
-              Welcome back, {loggedInUser.name}!
+              Welcome, {user.name}!
             </h2>
             <p className="text-xs font-semibold text-slate-500 mb-6">
-              Batch: {loggedInUser.batch} · {loggedInUser.tier} · ID: {loggedInUser.memberId}
+              Batch: {user.batch || "Alumni"} ·{" "}
+              {user.membership?.replace(/_/g, " ")} · ID: {user.membershipId}
             </p>
 
             <div className="bg-sky-50/70 border border-sky-100 rounded-2xl p-4 text-left mb-6 space-y-2.5">
@@ -214,33 +199,38 @@ export default function LoginPage() {
                 <span className="flex items-center gap-2 text-slate-600">
                   <Phone className="w-4 h-4 text-sky-500" /> Phone:
                 </span>
-                <span className="font-bold flex items-center gap-1.5">
-                  <span>{loggedInUser.flag}</span>
-                  <span>{loggedInUser.phone}</span>
-                </span>
+                <span className="font-bold">{user.phone}</span>
               </div>
-              <div className="flex items-center justify-between text-sm text-slate-700">
-                <span className="flex items-center gap-2 text-slate-600">
-                  <Globe className="w-4 h-4 text-sky-500" /> Member Region:
-                </span>
-                <span className="font-semibold text-slate-800">{loggedInUser.country}</span>
-              </div>
+              {user.email && (
+                <div className="flex items-center justify-between text-sm text-slate-700">
+                  <span className="flex items-center gap-2 text-slate-600">
+                    <Globe className="w-4 h-4 text-sky-500" /> Email:
+                  </span>
+                  <span className="font-semibold text-slate-800">
+                    {user.email}
+                  </span>
+                </div>
+              )}
               <div className="flex items-center justify-between text-sm text-slate-700">
                 <span className="flex items-center gap-2 text-slate-600">
                   <ShieldCheck className="w-4 h-4 text-emerald-500" /> Status:
                 </span>
-                <span className="font-bold text-emerald-600">Active Member</span>
+                <span className="font-bold text-emerald-600 capitalize">
+                  {user.membershipStatus || "Active"} Member
+                </span>
               </div>
             </div>
 
             {/* Quick Actions */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
               <Link
-                href="/dashboard"
+                href={
+                  user.role === "admin" ? "/admin/dashboard" : "/dashboard"
+                }
                 className="flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold text-sm shadow-md shadow-sky-500/25 transition-all"
               >
                 <LayoutDashboard className="w-4 h-4" />
-                Member Dashboard
+                {user.role === "admin" ? "Admin Portal" : "Member Dashboard"}
               </Link>
               <Link
                 href="/members"
@@ -262,31 +252,38 @@ export default function LoginPage() {
         ) : (
           /* Login Card */
           <div className="bg-white/95 backdrop-blur-md border-[1.5px] border-sky-100/90 rounded-3xl p-7 sm:p-9 shadow-2xl shadow-sky-900/10 transition-all">
-            {/* Quick Demo Autofill Notice */}
+            {/* Register Prompt */}
             <div className="mb-6 p-3 rounded-2xl bg-amber-50/90 border border-amber-200/80 flex items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-2 text-amber-900 font-medium">
                 <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
-                <span>Need test credentials?</span>
+                <span>New here?</span>
               </div>
-              <button
-                type="button"
-                onClick={handleDemoFill}
+              <Link
+                href="/membership"
                 className="shrink-0 px-3 py-1.5 rounded-lg bg-white border border-amber-300 text-amber-900 font-bold text-[11px] hover:bg-amber-100/60 shadow-sm transition-all cursor-pointer"
               >
-                ⚡ Autofill Demo
-              </button>
+                📝 Register Member
+              </Link>
             </div>
 
             {/* Error Message */}
             {errorMessage && (
-              <div className="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200 flex items-start gap-2.5 text-xs text-red-700 animate-shake">
+              <div className="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200 flex items-start gap-2.5 text-xs text-red-700">
                 <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                 <div className="flex-1 font-semibold">{errorMessage}</div>
               </div>
             )}
 
+            {/* Success Message */}
+            {successMessage && (
+              <div className="mb-5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-start gap-2.5 text-xs text-emerald-700">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                <div className="flex-1 font-semibold">{successMessage}</div>
+              </div>
+            )}
+
             <form onSubmit={handleLogin} className="space-y-5">
-              {/* Phone Number Field with Multi-Country Code */}
+              {/* Phone Number Field */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label
@@ -304,7 +301,9 @@ export default function LoginPage() {
                 <div className="flex rounded-xl border border-slate-200 bg-white focus-within:border-sky-500 focus-within:ring-4 focus-within:ring-sky-500/10 transition-all overflow-hidden shadow-xs">
                   {/* Country Selector Dropdown */}
                   <div className="relative bg-slate-50/90 border-r border-slate-200 flex items-center px-2.5 sm:px-3 shrink-0">
-                    <span className="text-base mr-1.5">{activeCountry.flag}</span>
+                    <span className="text-base mr-1.5">
+                      {activeCountry.flag}
+                    </span>
                     <select
                       value={countryCode}
                       onChange={(e) => setCountryCode(e.target.value)}
@@ -337,79 +336,30 @@ export default function LoginPage() {
                 </div>
 
                 <div className="flex items-center justify-between text-[11px] text-slate-500 mt-1.5 px-0.5">
-                  <span>Enter registered mobile number</span>
-                  <span className="text-sky-600 font-semibold">{activeCountry.name} ({activeCountry.code})</span>
-                </div>
-              </div>
-
-              {/* Password Field */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label
-                    htmlFor="password-input"
-                    className="block text-xs font-bold uppercase tracking-wider text-slate-700"
-                  >
-                    Password <span className="text-red-500">*</span>
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setShowForgotModal(true)}
-                    className="text-xs font-semibold text-sky-600 hover:text-sky-700 hover:underline transition-colors cursor-pointer"
-                  >
-                    Forgot Password?
-                  </button>
-                </div>
-                <div className="relative flex items-center">
-                  <div className="absolute left-3.5 text-slate-400 pointer-events-none">
-                    <Lock className="w-4 h-4 text-slate-500" />
-                  </div>
-                  <input
-                    id="password-input"
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    className="w-full pl-10 pr-11 py-3 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 font-medium transition-all shadow-xs"
-                    autoComplete="current-password"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 p-1 rounded-lg text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Remember Me */}
-              <div className="flex items-center justify-between pt-1">
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500 accent-sky-600 cursor-pointer"
-                  />
-                  <span className="text-xs font-medium text-slate-600">
-                    Keep me signed in on this device
+                  <span>Enter your registered mobile number</span>
+                  <span className="text-sky-600 font-semibold">
+                    {activeCountry.name} ({activeCountry.code})
                   </span>
-                </label>
+                </div>
+              </div>
+
+              {/* Info Banner */}
+              <div className="p-3 rounded-xl bg-sky-50 border border-sky-100 text-[11px] text-sky-800 leading-relaxed flex items-start gap-2">
+                <ShieldCheck className="w-4 h-4 text-sky-500 shrink-0 mt-0.5" />
+                <span>
+                  <strong>Passwordless Login:</strong> Just enter your
+                  registered phone number — your account will be recognized
+                  instantly.
+                </span>
               </div>
 
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-sky-500 via-sky-600 to-sky-700 hover:from-sky-600 hover:to-sky-800 text-white font-bold text-sm sm:text-base shadow-lg shadow-sky-500/25 hover:shadow-xl hover:shadow-sky-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                disabled={isSubmitting}
+                className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-linear-to-r from-sky-500 via-sky-600 to-sky-700 hover:from-sky-600 hover:to-sky-800 text-white font-bold text-sm sm:text-base shadow-lg shadow-sky-500/25 hover:shadow-xl hover:shadow-sky-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {isLoading ? (
+                {isSubmitting ? (
                   <>
                     <svg
                       className="animate-spin h-4 w-4 text-white"
@@ -431,7 +381,7 @@ export default function LoginPage() {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       />
                     </svg>
-                    <span>Verifying Credentials...</span>
+                    <span>Verifying...</span>
                   </>
                 ) : (
                   <>
@@ -443,189 +393,34 @@ export default function LoginPage() {
             </form>
 
             {/* Registration CTA */}
-            <div className="mt-8 pt-6 border-t border-slate-100 text-center">
+            <div className="mt-2 pt-3 border-t border-slate-100 text-center">
               <p className="text-xs text-slate-600 mb-3">
                 Don&apos;t have an alumni account yet?
               </p>
               <Link
                 href="/membership"
-                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-sky-50 hover:bg-sky-100/80 border border-sky-200/70 text-sky-700 hover:text-sky-800 font-bold text-sm transition-all"
+                className="inline-flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl border-2 border-sky-500 text-sky-600 hover:bg-sky-50 font-bold text-sm transition-all"
               >
                 <Users className="w-4 h-4" />
                 Register for Alumni Membership
-                <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
           </div>
         )}
 
-        {/* Security & Assistance Badges */}
-        <div className="mt-8 grid grid-cols-3 gap-2 text-center text-[11px] text-slate-500">
-          <div className="flex flex-col items-center gap-1 p-2">
-            <ShieldCheck className="w-4 h-4 text-sky-600" />
-            <span>256-Bit SSL Encrypted</span>
+        {/* Security Badge */}
+        <div className="mt-3 flex items-center justify-center gap-6 text-xs text-slate-500">
+          <div className="flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+            <span>256-bit SSL Encrypted</span>
           </div>
-          <div className="flex flex-col items-center gap-1 p-2">
-            <GraduationCap className="w-4 h-4 text-sky-600" />
-            <span>Verified Alumni Directory</span>
+          <span className="w-1 h-1 rounded-full bg-slate-300" />
+          <div className="flex items-center gap-1.5">74123
+            <GraduationCap className="w-4 h-4 text-sky-500" />
+            <span>Official Alumni Portal</span>
           </div>
-          <div className="flex flex-col items-center gap-1 p-2">
-            <HelpCircle className="w-4 h-4 text-sky-600" />
-            <Link href="/contact" className="hover:text-sky-600 underline underline-offset-2">
-              Need Help? Contact
-            </Link>
-          </div>
-        </div>
-
-        {/* Back to Home */}
-        <div className="mt-4 text-center">
-          <Link
-            href="/"
-            className="text-xs font-semibold text-slate-500 hover:text-sky-600 transition-colors inline-flex items-center gap-1"
-          >
-            ← Return to Homepage
-          </Link>
         </div>
       </div>
-
-      {/* Forgot Password Modal with Country Code */}
-      {showForgotModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-sky-100 relative">
-            <button
-              onClick={closeForgotModal}
-              type="button"
-              className="absolute top-5 right-5 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all cursor-pointer"
-              aria-label="Close"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center mb-4">
-              <KeyRound className="w-6 h-6" />
-            </div>
-
-            {forgotStep === 1 && (
-              <>
-                <h3 className="text-xl font-black text-slate-900 mb-1.5">
-                  Reset Account Password
-                </h3>
-                <p className="text-xs text-slate-600 mb-5 leading-relaxed">
-                  Select your country code and enter your registered mobile number. We will send a 4-digit SMS verification code to reset your password.
-                </p>
-
-                {forgotMsg && (
-                  <p className="text-xs text-red-600 font-semibold mb-3">{forgotMsg}</p>
-                )}
-
-                <form onSubmit={handleSendOtp} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                      Phone Number
-                    </label>
-                    <div className="flex rounded-xl border border-slate-200 bg-white focus-within:border-sky-500 overflow-hidden">
-                      <div className="relative bg-slate-50 border-r border-slate-200 flex items-center px-2 shrink-0">
-                        <span className="text-sm mr-1">{activeForgotCountry.flag}</span>
-                        <select
-                          value={forgotCountryCode}
-                          onChange={(e) => setForgotCountryCode(e.target.value)}
-                          className="bg-transparent text-xs font-bold text-slate-700 outline-none cursor-pointer pr-3 appearance-none py-2.5"
-                          aria-label="Country Code"
-                        >
-                          {countryDialCodes.map((c, idx) => (
-                            <option key={`${c.code}-${c.name}-${idx}`} value={c.code}>
-                              {c.flag} {c.code} ({c.name})
-                            </option>
-                          ))}
-                        </select>
-                        <ChevronDown className="w-3 h-3 text-slate-400 absolute right-0.5 pointer-events-none" />
-                      </div>
-
-                      <div className="relative flex-1 flex items-center">
-                        <input
-                          type="tel"
-                          value={forgotPhone}
-                          onChange={(e) => setForgotPhone(e.target.value)}
-                          placeholder={activeForgotCountry.placeholder}
-                          className="w-full px-3 py-2.5 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none font-medium"
-                          required
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm shadow-md shadow-sky-500/20 transition-all cursor-pointer"
-                  >
-                    <Send className="w-4 h-4" /> Send Verification Code
-                  </button>
-                </form>
-              </>
-            )}
-
-            {forgotStep === 2 && (
-              <>
-                <h3 className="text-xl font-black text-slate-900 mb-1.5">
-                  Enter SMS Verification Code
-                </h3>
-                <p className="text-xs text-slate-600 mb-5 leading-relaxed">
-                  We sent a 4-digit code to <strong>{forgotCountryCode} {forgotPhone}</strong>. (For demo testing, enter <strong>1234</strong>).
-                </p>
-
-                {forgotMsg && (
-                  <p className="text-xs text-red-600 font-semibold mb-3">{forgotMsg}</p>
-                )}
-
-                <form onSubmit={handleVerifyOtp} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                      4-Digit OTP Code
-                    </label>
-                    <input
-                      type="text"
-                      maxLength={6}
-                      value={otpCode}
-                      onChange={(e) => setOtpCode(e.target.value)}
-                      placeholder="1234"
-                      className="w-full text-center tracking-[0.5em] text-lg font-black py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-sky-500"
-                      required
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm shadow-md shadow-sky-500/20 transition-all cursor-pointer"
-                  >
-                    Verify & Reset Password
-                  </button>
-                </form>
-              </>
-            )}
-
-            {forgotStep === 3 && (
-              <div className="text-center py-2">
-                <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3">
-                  <CheckCircle2 className="w-8 h-8" />
-                </div>
-                <h3 className="text-lg font-black text-slate-900 mb-1">
-                  Password Reset Initiated
-                </h3>
-                <p className="text-xs text-slate-600 mb-6 leading-relaxed">
-                  A temporary password has been dispatched to <strong>{forgotCountryCode} {forgotPhone}</strong>. You can use it to sign in immediately and update your password in account settings.
-                </p>
-                <button
-                  type="button"
-                  onClick={closeForgotModal}
-                  className="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm shadow-md shadow-sky-500/20 transition-all cursor-pointer"
-                >
-                  Back to Sign In
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

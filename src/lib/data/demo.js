@@ -1526,20 +1526,20 @@ export const batches = [
 export const membershipTypes = [
   {
     name: "General Member",
-    fee: "BDT 500 / year",
+    fee: "BDT 1000 / year",
     features: ["Directory listing", "Event access", "Newsletter"],
     color: "var(--primary)",
   },
   {
     name: "Life Member",
-    fee: "BDT 5,000 (one-time)",
+    fee: "BDT 20000 (one-time)",
     features: ["All General benefits", "Voting rights", "Priority scholarship support", "Recognition certificate"],
     color: "var(--secondary-dark)",
     popular: true,
   },
   {
     name: "Patron Member",
-    fee: "BDT 15,000+",
+    fee: "BDT 20,000+",
     features: ["All Life benefits", "Name on honor board", "Special recognition", "Advisory role"],
     color: "#7c3aed",
   },

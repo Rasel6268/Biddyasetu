@@ -27,92 +27,7 @@ export default function AdminMembersPage() {
     setTimeout(() => setToastMsg(""), 4000);
   };
 
-  const [members, setMembers] = useState([
-    {
-      id: "BDS-LM-0842",
-      name: "Engr. Tanvir Ahmed",
-      batch: "2006",
-      phone: "+880 1712-894523",
-      email: "tanvir.ahmed@example.com",
-      profession: "Lead Software Architect",
-      company: "DataCraft Tech Ltd.",
-      location: "Dhaka, Bangladesh",
-      tier: "Life Member",
-      status: "Verified",
-      joinedDate: "15 Jan 2026",
-      totalPaid: 15000,
-    },
-    {
-      id: "BDS-GM-0911",
-      name: "Dr. Farhana Yasmin",
-      batch: "2009",
-      phone: "+880 1819-234567",
-      email: "farhana.yasmin@example.com",
-      profession: "Assistant Professor & Physician",
-      company: "Dhaka Medical College",
-      location: "Dhaka, Bangladesh",
-      tier: "General Member",
-      status: "Verified",
-      joinedDate: "20 Feb 2026",
-      totalPaid: 2000,
-    },
-    {
-      id: "BDS-PN-1044",
-      name: "S.M. Nahid Hasan",
-      batch: "2015",
-      phone: "+880 1911-778899",
-      email: "nahid.hasan@example.com",
-      profession: "Civil Engineer",
-      company: "Roads & Highways Dept.",
-      location: "Brahmanbaria, Bangladesh",
-      tier: "General Member",
-      status: "Pending Approval",
-      joinedDate: "Yesterday",
-      totalPaid: 1000,
-    },
-    {
-      id: "BDS-PN-1045",
-      name: "Kazi Nusrat Jahan",
-      batch: "2018",
-      phone: "+880 1622-334455",
-      email: "nusrat.jahan@example.com",
-      profession: "Research Associate",
-      company: "BRAC Institute",
-      location: "Dhaka, Bangladesh",
-      tier: "General Member",
-      status: "Pending Approval",
-      joinedDate: "Today",
-      totalPaid: 1000,
-    },
-    {
-      id: "BDS-LM-0102",
-      name: "Md. Rafiqul Islam",
-      batch: "1998",
-      phone: "+880 1711-000111",
-      email: "rafiqul.islam@biddyasetu.org",
-      profession: "Managing Director",
-      company: "Islam Group of Industries",
-      location: "Dhaka, Bangladesh",
-      tier: "Patron Member",
-      status: "Verified",
-      joinedDate: "17 Feb 2026",
-      totalPaid: 150000,
-    },
-    {
-      id: "BDS-GM-0789",
-      name: "Mahmudur Rahman",
-      batch: "2004",
-      phone: "+880 1755-667788",
-      email: "mahmud.rahman@example.com",
-      profession: "Branch Manager",
-      company: "Sonali Bank PLC",
-      location: "Kaitola, Bangladesh",
-      tier: "General Member",
-      status: "Verified",
-      joinedDate: "05 Mar 2026",
-      totalPaid: 3000,
-    },
-  ]);
+  const [members, setMembers] = useState([]);
 
   const handleApprove = (id) => {
     setMembers((prev) =>
@@ -263,13 +178,12 @@ export default function AdminMembersPage() {
 
                   <td className="py-4 px-4">
                     <span
-                      className={`px-2.5 py-1 rounded-full font-bold text-[10px] ${
-                        m.status === "Verified"
-                          ? "bg-emerald-100 text-emerald-800"
-                          : m.status === "Suspended"
+                      className={`px-2.5 py-1 rounded-full font-bold text-[10px] ${m.status === "Verified"
+                        ? "bg-emerald-100 text-emerald-800"
+                        : m.status === "Suspended"
                           ? "bg-rose-100 text-rose-800"
                           : "bg-amber-100 text-amber-800"
-                      }`}
+                        }`}
                     >
                       {m.status}
                     </span>

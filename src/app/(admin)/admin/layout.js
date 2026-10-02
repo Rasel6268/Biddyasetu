@@ -3,12 +3,14 @@
 import { useState } from "react";
 import AdminNavbar from "@/components/admin/AdminNavbar";
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export default function AdminLayout({ children }) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col font-sans">
+    <ProtectedRoute allowedRoles={["admin"]}>
+      <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col font-sans">
       {/* ─── Dedicated Admin Navbar (Top) ─── */}
       <AdminNavbar
         mobileSidebarOpen={mobileSidebarOpen}
@@ -34,5 +36,6 @@ export default function AdminLayout({ children }) {
         </main>
       </div>
     </div>
+  </ProtectedRoute>
   );
 }
