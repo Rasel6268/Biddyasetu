@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { ShieldCheck, Loader2 } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
 /**
  * ProtectedRoute Component
@@ -28,7 +28,6 @@ export default function ProtectedRoute({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { user, isAuthenticated, isLoading } = useAuth();
 
   // Determine user role
@@ -62,9 +61,8 @@ export default function ProtectedRoute({
 
     // 2. Auth required but user is NOT authenticated -> redirect to login with callback URL
     if (requireAuth && !isAuthenticated) {
-      const fullPath = searchParams?.toString()
-        ? `${pathname}?${searchParams.toString()}`
-        : pathname;
+      const search = typeof window !== "undefined" ? window.location.search : "";
+      const fullPath = search ? `${pathname}${search}` : pathname;
 
       const targetLogin = redirectTo || `/login?redirect=${encodeURIComponent(fullPath)}`;
       router.replace(targetLogin);
@@ -86,7 +84,6 @@ export default function ProtectedRoute({
     guestOnly,
     redirectTo,
     pathname,
-    searchParams,
     router,
   ]);
 

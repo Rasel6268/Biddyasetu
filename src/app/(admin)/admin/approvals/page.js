@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { UserCheck, CheckCircle2, Clock, Eye, X } from "lucide-react";
+import { UserCheck, CheckCircle2, Eye, X } from "lucide-react";
 
 export default function AdminApprovalsPage() {
   const [toastMsg, setToastMsg] = useState("");
