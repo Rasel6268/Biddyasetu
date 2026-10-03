@@ -39,6 +39,7 @@ const navLinks = [
 export default function Navbar() {
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
+  const [mounted, setMounted] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -46,33 +47,9 @@ export default function Navbar() {
 
   const userDropdownRef = useRef(null);
 
-  // Do not render public Navbar on Admin console
-  if (pathname?.startsWith("/admin")) {
-    return null;
-  }
-
-  // Derive display values from authenticated user
-  const authUser = {
-    name: user?.name || "Member",
-    email: user?.email || user?.phone || "",
-    batch: user?.batch || "Alumni",
-    tier: user?.membership
-      ? user.membership
-          .replace(/_/g, " ")
-          .replace(/\b\w/g, (l) => l.toUpperCase())
-      : "General Member",
-    memberId: user?.membershipId || "BDS-MEMBER",
-    initials: user?.name
-      ? user.name
-          .split(" ")
-          .filter(Boolean)
-          .map((n) => n[0])
-          .slice(0, 2)
-          .join("")
-          .toUpperCase()
-      : "U",
-    isAdmin: user?.role === "admin",
-  };
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -91,13 +68,40 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Do not render public Navbar on Admin console
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
+  // Derive display values from authenticated user
+  const authUser = {
+    name: user?.name || "Member",
+    email: user?.email || user?.phone || "",
+    batch: user?.batch || "Alumni",
+    tier: user?.membership
+      ? user.membership
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, (l) => l.toUpperCase())
+      : "General Member",
+    memberId: user?.membershipId || "BDS-MEMBER",
+    initials: user?.name
+      ? user.name
+        .split(" ")
+        .filter(Boolean)
+        .map((n) => n[0])
+        .slice(0, 2)
+        .join("")
+        .toUpperCase()
+      : "U",
+    isAdmin: user?.role === "admin",
+  };
+
   return (
     <header
-      className={`sticky top-0 z-[100] transition-all duration-500 ${
-        scrolled
+      className={`sticky top-0 z-[100] transition-all duration-500 ${scrolled
           ? "bg-white/95 backdrop-blur-md border-b border-sky-100/80 shadow-lg shadow-sky-900/5"
           : "bg-gradient-to-r from-[#FDF9DF]/95 via-[#FDF9DF]/90 to-[#FDF9DF]/95 backdrop-blur-sm border-b border-sky-100/30"
-      }`}
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="h-[76px] flex items-center justify-between">
@@ -132,10 +136,6 @@ export default function Navbar() {
                 <span className="text-[11px] text-slate-500 font-semibold leading-none tracking-wide transition-colors duration-300 group-hover:text-slate-700">
                   Adarsha High School, Kaitola
                 </span>
-                <span className="w-1 h-1 rounded-full bg-sky-400/40" />
-                <span className="text-[10px] text-sky-500 font-medium leading-none">
-                  Est. 2026
-                </span>
               </div>
             </div>
           </Link>
@@ -152,17 +152,15 @@ export default function Navbar() {
                 >
                   <button
                     type="button"
-                    className={`flex items-center gap-1 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all cursor-pointer ${
-                      openDropdown === link.label
+                    className={`flex items-center gap-1 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all cursor-pointer ${openDropdown === link.label
                         ? "bg-sky-50 text-sky-600 shadow-sm"
                         : "text-slate-600 hover:text-sky-600 hover:bg-sky-50/60"
-                    }`}
+                      }`}
                   >
                     {link.label}
                     <ChevronDown
-                      className={`w-3.5 h-3.5 transition-all duration-200 ${
-                        openDropdown === link.label ? "rotate-180 text-sky-600 scale-110" : ""
-                      }`}
+                      className={`w-3.5 h-3.5 transition-all duration-200 ${openDropdown === link.label ? "rotate-180 text-sky-600 scale-110" : ""
+                        }`}
                     />
                   </button>
 
@@ -197,17 +195,16 @@ export default function Navbar() {
 
           {/* Desktop Right Actions: Auth State Switch */}
           <div className="hidden lg:flex items-center gap-3">
-            {isAuthenticated ? (
-             
+            {mounted && isAuthenticated ? (
+
               <div className="relative" ref={userDropdownRef}>
                 <button
                   type="button"
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className={`flex items-center gap-3 p-1.5 pr-3.5 rounded-2xl border transition-all cursor-pointer ${
-                    userDropdownOpen
+                  className={`flex items-center gap-3 p-1.5 pr-3.5 rounded-2xl border transition-all cursor-pointer ${userDropdownOpen
                       ? "bg-white border-sky-400 shadow-md shadow-sky-500/10 ring-2 ring-sky-500/20"
                       : "bg-white/80 hover:bg-white border-slate-200/90 hover:border-sky-300 shadow-xs"
-                  }`}
+                    }`}
                   aria-label="User Account Menu"
                 >
                   <div className="relative">
@@ -233,9 +230,8 @@ export default function Navbar() {
                   </div>
 
                   <ChevronDown
-                    className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
-                      userDropdownOpen ? "rotate-180 text-sky-600" : ""
-                    }`}
+                    className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${userDropdownOpen ? "rotate-180 text-sky-600" : ""
+                      }`}
                   />
                 </button>
 
@@ -364,7 +360,7 @@ export default function Navbar() {
 
           {/* Mobile Hamburger Button */}
           <div className="flex items-center gap-2 lg:hidden">
-            {isAuthenticated ? (
+            {mounted && isAuthenticated ? (
               <Link
                 href="/dashboard"
                 className="w-9 h-9 rounded-xl bg-sky-600 text-white font-black text-xs flex items-center justify-center shadow-xs"
@@ -410,7 +406,7 @@ export default function Navbar() {
 
             {/* Mobile Auth Section */}
             <div className="pt-4 mt-3 border-t border-slate-100 space-y-3">
-              {isAuthenticated ? (
+              {mounted && isAuthenticated ? (
                 <div className="space-y-2">
                   <div className="p-3.5 bg-sky-50/80 rounded-2xl border border-sky-100 flex items-center justify-between">
                     <div>

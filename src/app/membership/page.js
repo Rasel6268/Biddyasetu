@@ -101,6 +101,12 @@ export default function MembershipPage() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [registeredMember, setRegisteredMember] = useState(null);
 
+  const [profileImage, setProfileImage] = useState(null);
+  const [profileImagePreview, setProfileImagePreview] = useState("");
+  const [imageUploading, setImageUploading] = useState(false);
+  const [imageUploadProgress, setImageUploadProgress] = useState(0);
+  const [profileImageUrl, setProfileImageUrl] = useState("");
+
   const activePhoneCountry =
     countryDialCodes.find((c) => c.code === phoneCountryCode) ||
     countryDialCodes[0];
@@ -138,6 +144,91 @@ export default function MembershipPage() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+  const handleProfileImageChange = async (e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      showError("Please select a valid image.");
+      return;
+    }
+
+    // Validate size - 5MB
+    if (file.size > 5 * 1024 * 1024) {
+      showError("Profile photo must be less than 5MB.");
+      return;
+    }
+
+    try {
+      setProfileImage(file);
+
+      // Preview
+      const previewUrl = URL.createObjectURL(file);
+      setProfileImagePreview(previewUrl);
+
+      setImageUploading(true);
+      setImageUploadProgress(0);
+
+      // Get ImageKit authentication
+      const authResponse = await fetch("/api/imagekit-auth");
+
+      if (!authResponse.ok) {
+        throw new Error("ImageKit authentication failed.");
+      }
+
+      const auth = await authResponse.json();
+
+      // Dynamic import so upload stays client-side
+      const { upload } = await import("@imagekit/next");
+
+      const uploadResponse = await upload({
+        file,
+        fileName: `profile-${Date.now()}-${file.name}`,
+
+        token: auth.token,
+        signature: auth.signature,
+        expire: auth.expire,
+        publicKey: auth.publicKey,
+        urlEndpoint: auth.urlEndpoint || process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT,
+
+        folder: "/biddyasetu/members",
+
+        onProgress: (event) => {
+          if (event.total) {
+            const progress = Math.round(
+              (event.loaded / event.total) * 100
+            );
+
+            setImageUploadProgress(progress);
+          }
+        },
+      });
+      if (!uploadResponse?.url) {
+        throw new Error("Image upload failed.");
+      }
+
+      // Save ImageKit URL
+      setProfileImageUrl(uploadResponse.url);
+
+      showSuccess("Profile photo uploaded successfully!");
+
+    } catch (error) {
+      console.error("Profile image upload error:", error);
+
+      setProfileImage(null);
+      setProfileImagePreview("");
+      setProfileImageUrl("");
+      setImageUploadProgress(0);
+
+      showError(
+        error.message || "Failed to upload profile photo."
+      );
+    } finally {
+      setImageUploading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -157,6 +248,7 @@ export default function MembershipPage() {
         fullName: formData.fullName,
         email: formData.email || null,
         phone: fullPhone,
+        profileImage: profileImageUrl || null,
         gender: formData.gender,
         dateOfBirth: formData.dateOfBirth,
         bloodGroup: formData.bloodGroup,
@@ -352,11 +444,10 @@ export default function MembershipPage() {
                 </div>
                 <div className="text-right">
                   <span
-                    className={`inline-flex items-center gap-1 font-extrabold px-3 py-1 rounded-full uppercase text-xs ${
-                      paymentSuccess
-                        ? "bg-emerald-100 text-emerald-700 border border-emerald-300"
-                        : "bg-rose-100 text-rose-700 border border-rose-200 animate-pulse"
-                    }`}
+                    className={`inline-flex items-center gap-1 font-extrabold px-3 py-1 rounded-full uppercase text-xs ${paymentSuccess
+                      ? "bg-emerald-100 text-emerald-700 border border-emerald-300"
+                      : "bg-rose-100 text-rose-700 border border-rose-200 animate-pulse"
+                      }`}
                   >
                     {paymentSuccess ? "PAID & ACTIVE" : "UNPAID (Pending)"}
                   </span>
@@ -389,11 +480,10 @@ export default function MembershipPage() {
                       </td>
                       <td className="py-3 px-3">
                         <span
-                          className={`font-bold ${
-                            paymentSuccess
-                              ? "text-emerald-600"
-                              : "text-rose-600"
-                          }`}
+                          className={`font-bold ${paymentSuccess
+                            ? "text-emerald-600"
+                            : "text-rose-600"
+                            }`}
                         >
                           {paymentSuccess ? "Paid" : "Unpaid"}
                         </span>
@@ -494,7 +584,7 @@ export default function MembershipPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 href="/dashboard"
-                className="w-full sm:w-auto bg-gradient-to-r from-[#06A3EC] to-[#0284c7] text-white px-8 py-3.5 rounded-xl font-bold hover:shadow-lg hover:shadow-sky-400/30 transition-all duration-300 flex items-center justify-center gap-2 text-sm"
+                className="w-full sm:w-auto bg-linear-to-r from-[#06A3EC] to-[#0284c7] text-white px-8 py-3.5 rounded-xl font-bold hover:shadow-lg hover:shadow-sky-400/30 transition-all duration-300 flex items-center justify-center gap-2 text-sm"
               >
                 <LogIn size={18} /> Continue to Member Dashboard
               </Link>
@@ -634,22 +724,20 @@ export default function MembershipPage() {
                       (label, i) => (
                         <div key={label} className="text-center flex-1">
                           <div
-                            className={`w-10 h-10 rounded-full flex items-center justify-center font-extrabold text-sm mx-auto mb-2 transition-all duration-500 ${
-                              step > i + 1
-                                ? "bg-emerald-500 text-white shadow-lg shadow-emerald-400/30"
-                                : step === i + 1
+                            className={`w-10 h-10 rounded-full flex items-center justify-center font-extrabold text-sm mx-auto mb-2 transition-all duration-500 ${step > i + 1
+                              ? "bg-emerald-500 text-white shadow-lg shadow-emerald-400/30"
+                              : step === i + 1
                                 ? "bg-gradient-to-r from-[#06A3EC] to-[#0284c7] text-white shadow-lg shadow-sky-400/30 scale-110"
                                 : "bg-[var(--border)] text-[var(--text-muted)]"
-                            }`}
+                              }`}
                           >
                             {step > i + 1 ? <CheckCircle size={18} /> : i + 1}
                           </div>
                           <span
-                            className={`text-xs font-bold transition-colors duration-300 ${
-                              step === i + 1
-                                ? "text-[var(--primary)]"
-                                : "text-[var(--text-muted)]"
-                            }`}
+                            className={`text-xs font-bold transition-colors duration-300 ${step === i + 1
+                              ? "text-[var(--primary)]"
+                              : "text-[var(--text-muted)]"
+                              }`}
                           >
                             {label}
                           </span>
@@ -817,34 +905,96 @@ export default function MembershipPage() {
 
                         <FormGroup
                           label="Profile Photo"
-                          hint="JPG or PNG, max 5MB"
+                          hint="JPG, PNG or WebP, max 5MB"
                           icon={Camera}
                         >
-                          <div className="border-2 border-dashed border-[var(--border)] rounded-xl p-8 text-center cursor-pointer hover:border-[var(--primary)] hover:bg-sky-50/50 transition-all duration-300 group">
+                          <div className="border-2 border-dashed border-[var(--border)] rounded-xl p-6 text-center hover:border-[var(--primary)] hover:bg-sky-50/50 transition-all duration-300">
+
                             <input
                               type="file"
-                              accept="image/*"
+                              accept="image/jpeg,image/png,image/webp"
                               className="hidden"
                               id="profilePhoto"
                               name="profileImage"
+                              onChange={handleProfileImageChange}
                             />
+
                             <label
                               htmlFor="profilePhoto"
                               className="cursor-pointer block"
                             >
-                              <div className="w-14 h-14 rounded-full bg-sky-50 flex items-center justify-center mx-auto mb-3 group-hover:bg-sky-100 transition-colors">
-                                <Camera
-                                  size={24}
-                                  className="text-[var(--primary)]"
-                                />
-                              </div>
-                              <p className="text-sm text-[var(--text)] font-semibold">
-                                Click or drag photo here
-                              </p>
-                              <span className="text-xs text-[var(--text-muted)]">
-                                Supports PNG, JPG up to 5MB
-                              </span>
+                              {profileImagePreview ? (
+                                <div className="flex flex-col items-center">
+
+                                  <img
+                                    src={profileImagePreview}
+                                    alt="Profile preview"
+                                    className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg mb-3"
+                                  />
+
+                                  <p className="text-sm font-semibold text-[var(--text)]">
+                                    {profileImage?.name}
+                                  </p>
+
+                                  <span className="text-xs text-[var(--text-muted)] mt-1">
+                                    Click to change photo
+                                  </span>
+
+                                </div>
+                              ) : (
+                                <>
+                                  <div className="w-14 h-14 rounded-full bg-sky-50 flex items-center justify-center mx-auto mb-3">
+                                    <Camera
+                                      size={24}
+                                      className="text-[var(--primary)]"
+                                    />
+                                  </div>
+
+                                  <p className="text-sm text-[var(--text)] font-semibold">
+                                    Click or drag photo here
+                                  </p>
+
+                                  <span className="text-xs text-[var(--text-muted)]">
+                                    Supports PNG, JPG, WebP up to 5MB
+                                  </span>
+                                </>
+                              )}
                             </label>
+
+                            {/* Upload Progress */}
+                            {imageUploading && (
+                              <div className="mt-4">
+
+                                <div className="flex justify-between text-xs font-semibold mb-1">
+                                  <span className="text-slate-600">
+                                    Uploading profile photo...
+                                  </span>
+
+                                  <span className="text-sky-600">
+                                    {imageUploadProgress}%
+                                  </span>
+                                </div>
+
+                                <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                                  <div
+                                    className="h-full bg-gradient-to-r from-[#06A3EC] to-[#0284c7] transition-all duration-300"
+                                    style={{
+                                      width: `${imageUploadProgress}%`,
+                                    }}
+                                  />
+                                </div>
+
+                              </div>
+                            )}
+
+                            {/* Uploaded */}
+                            {profileImageUrl && !imageUploading && (
+                              <div className="mt-3 flex items-center justify-center gap-2 text-xs font-semibold text-emerald-600">
+                                <CheckCircle size={15} />
+                                Profile photo uploaded successfully
+                              </div>
+                            )}
+
                           </div>
                         </FormGroup>
 

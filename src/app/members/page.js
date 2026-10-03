@@ -89,10 +89,18 @@ const PremiumMemberCard = ({ member, index, isManaging = false, expanded = false
         {/* Main horizontal row: LEFT image | RIGHT info */}
         <div className="flex flex-row items-stretch">
           {/* LEFT: Member Image */}
-          <div className="relative shrink-0 w-32 sm:w-40">
-            <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-sky-200 to-sky-400 flex items-center justify-center text-white font-black text-4xl">
-              {member.initials}
-            </div>
+          <div className="relative shrink-0 w-32 sm:w-40 overflow-hidden bg-slate-100">
+            {member.profileImage || member.image || member.avatar ? (
+              <img
+                src={member.profileImage || member.image || member.avatar}
+                alt={member.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-sky-200 to-sky-400 flex items-center justify-center text-white font-black text-4xl">
+                {member.initials}
+              </div>
+            )}
             {member.verified && (
               <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow-md">
                 <BadgeCheck className="w-5 h-5 text-sky-500 fill-sky-500 stroke-white" />

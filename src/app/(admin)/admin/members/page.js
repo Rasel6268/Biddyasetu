@@ -147,9 +147,17 @@ export default function AdminMembersPage() {
                 <tr key={m.id} className="hover:bg-slate-50/70 transition-colors">
                   <td className="py-4 px-5">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-sky-700 text-white font-black text-xs flex items-center justify-center shrink-0">
-                        {m.name.slice(0, 2).toUpperCase()}
-                      </div>
+                      {m.profileImage || m.image ? (
+                        <img
+                          src={m.profileImage || m.image}
+                          alt={m.name}
+                          className="w-9 h-9 rounded-xl object-cover shrink-0"
+                        />
+                      ) : (
+                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-sky-700 text-white font-black text-xs flex items-center justify-center shrink-0">
+                          {m.name.slice(0, 2).toUpperCase()}
+                        </div>
+                      )}
                       <div>
                         <div className="font-bold text-slate-900 text-sm">{m.name}</div>
                         <div className="text-[11px] text-sky-700 font-mono">

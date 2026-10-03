@@ -17,28 +17,8 @@ const AuthContext = createContext({
 });
 
 export const AuthProvider = ({ children }) => {
-  // Lazy initialization from localStorage so we don't trigger extra re-renders
-  const [user, setUser] = useState(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("biddyasetu_user");
-      if (stored) {
-        try {
-          return JSON.parse(stored);
-        } catch (e) {
-          // ignore error
-        }
-      }
-    }
-    return null;
-  });
-
-  const [token, setToken] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("biddyasetu_token") || null;
-    }
-    return null;
-  });
-
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   /**
@@ -69,6 +49,21 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    // Restore cached session on client mount
+    if (typeof window !== "undefined") {
+      const storedToken = localStorage.getItem("biddyasetu_token");
+      const storedUser = localStorage.getItem("biddyasetu_user");
+      if (storedToken) {
+        setToken(storedToken);
+      }
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch (e) {
+          // ignore error
+        }
+      }
+    }
     checkAuth();
   }, [checkAuth]);
 

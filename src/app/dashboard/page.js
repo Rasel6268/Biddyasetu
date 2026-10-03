@@ -46,6 +46,7 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 export default function MemberDashboardPage() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading: isAuthLoading, updateProfile, changePassword, payMembership, logout } = useAuth();
+  console.log(user)
 
   const [activeTab, setActiveTab] = useState("overview");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);

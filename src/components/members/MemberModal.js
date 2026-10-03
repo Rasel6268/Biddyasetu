@@ -71,14 +71,22 @@ export default function MemberModal({ member, onClose }) {
           {/* Avatar & Badges Header */}
           <div className="flex items-end justify-between flex-wrap gap-4 mb-4">
             <div className="relative">
-              <div
-                className="w-24 h-24 rounded-full border-4 border-white flex items-center justify-center text-white font-black text-2xl shadow-xl"
-                style={{
-                  background: `linear-gradient(135deg, ${member.avatarColor || "#06A3EC"}dd, ${member.avatarColor || "#06A3EC"})`,
-                }}
-              >
-                {member.initials}
-              </div>
+              {member.profileImage || member.image || member.avatar ? (
+                <img
+                  src={member.profileImage || member.image || member.avatar}
+                  alt={member.name}
+                  className="w-24 h-24 rounded-full border-4 border-white object-cover shadow-xl"
+                />
+              ) : (
+                <div
+                  className="w-24 h-24 rounded-full border-4 border-white flex items-center justify-center text-white font-black text-2xl shadow-xl"
+                  style={{
+                    background: `linear-gradient(135deg, ${member.avatarColor || "#06A3EC"}dd, ${member.avatarColor || "#06A3EC"})`,
+                  }}
+                >
+                  {member.initials}
+                </div>
+              )}
               {member.verified && (
                 <div
                   className="absolute bottom-1 right-1 bg-white rounded-full p-0.5 shadow-md"
