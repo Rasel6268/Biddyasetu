@@ -16,6 +16,13 @@ export const orgInfo = {
   phone: "+880 1700-000000",
   address: "Kaitola, Adarsha High School, Bangladesh",
   facebook: "https://facebook.com/biddyasetu",
+  bankAccount: {
+    accountName: "BIDDYSETU / (বিদ্যাসেতু )",
+    accountNumber: "3822010022341",
+    bankName: "Rupali Bank PLC",
+    branchName: "Nakalia Br, Noor Super Market, Nakalia Bazar, Bera, Pabna",
+    routingNumber: "185761635",
+  },
 };
 
 export const stats = [
@@ -1539,7 +1546,7 @@ export const membershipTypes = [
   },
   {
     name: "Patron Member",
-    fee: "BDT 20,000+",
+    fee: "BDT 50,000+",
     features: ["All Life benefits", "Name on honor board", "Special recognition", "Advisory role"],
     color: "#7c3aed",
   },

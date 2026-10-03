@@ -21,7 +21,7 @@ import { FaFacebook } from "react-icons/fa";
 
 export default function ContactPage() {
   const [sent, setSent] = useState(false);
-  const [copiedAcc, setCopiedAcc] = useState(false);
+  const [copiedField, setCopiedField] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -29,11 +29,11 @@ export default function ContactPage() {
     message: "",
   });
 
-  const handleCopy = (text) => {
+  const handleCopy = (text, fieldName = "acc") => {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
       navigator.clipboard.writeText(text);
-      setCopiedAcc(true);
-      setTimeout(() => setCopiedAcc(false), 2000);
+      setCopiedField(fieldName);
+      setTimeout(() => setCopiedField(""), 2000);
     }
   };
 
@@ -209,45 +209,60 @@ export default function ContactPage() {
                   <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.75rem" }}>
                     <Heart size={22} color="var(--primary)" fill="var(--primary)" />
                     <h3 style={{ fontWeight: 800, fontSize: "1.2rem", color: "var(--text)", margin: 0 }}>
-                      Official Bank Account
+                      Official Bank Account (Donation / Welfare)
                     </h3>
                   </div>
                   <p style={{ fontSize: "0.875rem", color: "var(--text-muted)", lineHeight: 1.6, marginBottom: "1.25rem" }}>
-                    Contributions directly fund scholarships and student welfare at Adarsha High School.
+                    Official account of Biddyasetu Alumni Organization. Contributions directly fund scholarships and student welfare at Adarsha High School.
                   </p>
 
                   <div
                     style={{
                       background: "var(--background)",
-                      borderRadius: "0.75rem",
+                      borderRadius: "0.875rem",
                       padding: "1.25rem",
                       border: "1px solid var(--border)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.75rem",
                     }}
                   >
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-                      <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: 600 }}>Account Name:</span>
-                      <strong style={{ fontSize: "0.875rem", color: "var(--text)" }}>Biddyasetu Alumni Fund</strong>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem" }}>
+                      <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: 600, shrink: 0 }}>Account Name:</span>
+                      <strong style={{ fontSize: "0.875rem", color: "var(--text)", textAlign: "right" }}>
+                        BIDDYSETU / (বিদ্যাসেতু )
+                      </strong>
                     </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem" }}>
                       <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: 600 }}>Bank:</span>
-                      <strong style={{ fontSize: "0.875rem", color: "var(--text)" }}>Sonali Bank PLC (Kaitola)</strong>
+                      <strong style={{ fontSize: "0.875rem", color: "var(--text)" }}>Rupali Bank PLC</strong>
                     </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "0.5rem", borderTop: "1px solid var(--border)" }}>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem" }}>
+                      <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: 600, shrink: 0 }}>Branch:</span>
+                      <strong style={{ fontSize: "0.8125rem", color: "var(--text)", textAlign: "right", maxWidth: "260px" }}>
+                        Nakalia Br, Noor Super Market, Nakalia Bazar, Bera, Pabna
+                      </strong>
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "0.6rem", borderTop: "1px solid var(--border)" }}>
                       <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: 600 }}>Account Number:</span>
                       <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                        <span style={{ fontFamily: "monospace", fontSize: "0.95rem", fontWeight: 800, color: "var(--primary)" }}>
-                          0012345678901
+                        <span style={{ fontFamily: "monospace", fontSize: "1rem", fontWeight: 800, color: "var(--primary)" }}>
+                          3822010022341
                         </span>
                         <button
-                          onClick={() => handleCopy("0012345678901")}
+                          type="button"
+                          onClick={() => handleCopy("3822010022341", "acc")}
                           title="Copy Account Number"
                           style={{
-                            background: copiedAcc ? "rgba(22,163,74,0.1)" : "rgba(6,163,236,0.1)",
+                            background: copiedField === "acc" ? "rgba(22,163,74,0.1)" : "rgba(6,163,236,0.1)",
                             border: "none",
                             borderRadius: "0.375rem",
                             padding: "0.25rem 0.5rem",
                             cursor: "pointer",
-                            color: copiedAcc ? "var(--success)" : "var(--primary)",
+                            color: copiedField === "acc" ? "var(--success)" : "var(--primary)",
                             fontSize: "0.75rem",
                             fontWeight: 700,
                             display: "flex",
@@ -255,8 +270,38 @@ export default function ContactPage() {
                             gap: "0.2rem",
                           }}
                         >
-                          {copiedAcc ? <Check size={12} /> : <Copy size={12} />}
-                          {copiedAcc ? "Copied" : "Copy"}
+                          {copiedField === "acc" ? <Check size={12} /> : <Copy size={12} />}
+                          {copiedField === "acc" ? "Copied" : "Copy"}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "0.6rem", borderTop: "1px solid var(--border)" }}>
+                      <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: 600 }}>Routing Number:</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                        <span style={{ fontFamily: "monospace", fontSize: "0.95rem", fontWeight: 700, color: "var(--text)" }}>
+                          185761635
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopy("185761635", "routing")}
+                          title="Copy Routing Number"
+                          style={{
+                            background: copiedField === "routing" ? "rgba(22,163,74,0.1)" : "rgba(6,163,236,0.1)",
+                            border: "none",
+                            borderRadius: "0.375rem",
+                            padding: "0.25rem 0.5rem",
+                            cursor: "pointer",
+                            color: copiedField === "routing" ? "var(--success)" : "var(--primary)",
+                            fontSize: "0.75rem",
+                            fontWeight: 700,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.2rem",
+                          }}
+                        >
+                          {copiedField === "routing" ? <Check size={12} /> : <Copy size={12} />}
+                          {copiedField === "routing" ? "Copied" : "Copy"}
                         </button>
                       </div>
                     </div>

@@ -35,6 +35,7 @@ import { FaLinkedin, FaFacebook } from "react-icons/fa";
 import { LiaLinkedin } from "react-icons/lia";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
 import MemberModal from "@/components/members/MemberModal";
+import { useMembers } from "@/hooks/useQueries";
 
 const professions = [...new Set(alumniMembers.map((m) => m.profession))];
 const countries = [...new Set(alumniMembers.map((m) => m.country))];
@@ -351,15 +352,58 @@ export default function MembersPage() {
     { id: "doctors", label: "Medical & Health" },
   ];
 
+  const { data: dbMembers = [] } = useMembers();
+
+  const allMembers = useMemo(() => {
+    if (!dbMembers || dbMembers.length === 0) return alumniMembers;
+
+    // Format DB members to match directory structure
+    const formattedDbMembers = dbMembers.map((m) => {
+      const tierName =
+        m.packageData?.packageName ||
+        (m.membership === "life_member"
+          ? "Life Member"
+          : m.membership === "donor_member"
+            ? "Donor Member"
+            : "General Member");
+
+      return {
+        id: m.membershipId || `AHS-${m._id?.slice(-4) || "0001"}`,
+        name: m.name,
+        nameBn: m.nameBn,
+        batch: m.batch ? String(m.batch) : "2015",
+        profession: m.profession || "Alumni Member",
+        company: m.organization || m.company || "",
+        location: m.currentAddress?.city || "Nakalia, Bera",
+        country: m.currentAddress?.country || "Bangladesh",
+        membership: tierName,
+        bloodGroup: m.bloodGroup || null,
+        profileImage: m.profileImage || null,
+        initials: (m.name || "A").slice(0, 2).toUpperCase(),
+        verified: (m.membershipStatus || m.status) === "active" || (m.membershipStatus || m.status) === "Verified",
+        phone: m.phone,
+        email: m.email,
+        bio: m.bio || "",
+        joinDate: m.createdAt ? new Date(m.createdAt).toLocaleDateString() : "2024",
+      };
+    });
+
+    // Deduplicate against demo members by phone/ID/name
+    const existingPhones = new Set(formattedDbMembers.map((m) => m.phone).filter(Boolean));
+    const nonDuplicatedDemo = alumniMembers.filter((m) => !existingPhones.has(m.phone));
+
+    return [...formattedDbMembers, ...nonDuplicatedDemo];
+  }, [dbMembers]);
+
   const filtered = useMemo(() => {
-    let list = alumniMembers.filter((m) => {
+    let list = allMembers.filter((m) => {
       const q = search.toLowerCase();
       if (
         q &&
         !m.name.toLowerCase().includes(q) &&
         !m.profession.toLowerCase().includes(q) &&
-        !m.location.toLowerCase().includes(q) &&
-        !m.batch.toLowerCase().includes(q)
+        !m.location?.toLowerCase().includes(q) &&
+        !m.batch?.toLowerCase().includes(q)
       )
         return false;
 
@@ -372,8 +416,8 @@ export default function MembersPage() {
       if (activePill === "verified" && !m.verified) return false;
       if (activePill === "blood" && !m.bloodGroup) return false;
       if (activePill === "abroad" && m.country === "Bangladesh") return false;
-      if (activePill === "engineers" && !m.profession.toLowerCase().includes("engineer")) return false;
-      if (activePill === "doctors" && !m.profession.toLowerCase().includes("doctor")) return false;
+      if (activePill === "engineers" && !m.profession?.toLowerCase().includes("engineer")) return false;
+      if (activePill === "doctors" && !m.profession?.toLowerCase().includes("doctor")) return false;
 
       return true;
     });
@@ -382,20 +426,20 @@ export default function MembersPage() {
       if (sortBy === "name-asc") return a.name.localeCompare(b.name);
       if (sortBy === "name-desc") return b.name.localeCompare(a.name);
       if (sortBy === "batch-desc") {
-        const yearA = parseInt(a.batch.replace(/\D/g, ""), 10) || 0;
-        const yearB = parseInt(b.batch.replace(/\D/g, ""), 10) || 0;
+        const yearA = parseInt((a.batch || "").replace(/\D/g, ""), 10) || 0;
+        const yearB = parseInt((b.batch || "").replace(/\D/g, ""), 10) || 0;
         return yearB - yearA;
       }
       if (sortBy === "batch-asc") {
-        const yearA = parseInt(a.batch.replace(/\D/g, ""), 10) || 0;
-        const yearB = parseInt(b.batch.replace(/\D/g, ""), 10) || 0;
+        const yearA = parseInt((a.batch || "").replace(/\D/g, ""), 10) || 0;
+        const yearB = parseInt((b.batch || "").replace(/\D/g, ""), 10) || 0;
         return yearA - yearB;
       }
       return 0;
     });
 
     return list;
-  }, [search, filterBatch, filterProfession, filterCountry, filterMembership, activePill, sortBy]);
+  }, [allMembers, search, filterBatch, filterProfession, filterCountry, filterMembership, activePill, sortBy]);
 
   const hasFilters = filterBatch || filterProfession || filterCountry || filterMembership || activePill !== "all";
 
@@ -408,10 +452,10 @@ export default function MembersPage() {
     setSearch("");
   };
 
-  const totalVerified = alumniMembers.filter((m) => m.verified).length;
-  const totalLife = alumniMembers.filter((m) => m.membership === "Life Member").length;
-  const totalAbroad = alumniMembers.filter((m) => m.country !== "Bangladesh").length;
-  const totalBloodDonors = alumniMembers.filter((m) => m.bloodGroup).length;
+  const totalVerified = allMembers.filter((m) => m.verified).length;
+  const totalLife = allMembers.filter((m) => m.membership === "Life Member").length;
+  const totalAbroad = allMembers.filter((m) => m.country !== "Bangladesh").length;
+  const totalBloodDonors = allMembers.filter((m) => m.bloodGroup).length;
 
   return (
     <>
@@ -432,12 +476,12 @@ export default function MembersPage() {
             Alumni Directory
           </h1>
           <p className="text-base sm:text-lg text-white/90 max-w-2xl mx-auto mb-8 font-medium">
-            Discover and connect with {alumniMembers.length}+ Adarsha High School graduates across Bangladesh and abroad.
+            Discover and connect with {allMembers.length}+ Adarsha High School graduates across Bangladesh and abroad.
           </p>
 
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 max-w-3xl mx-auto">
             {[
-              { label: "Total Members", val: alumniMembers.length, icon: GraduationCap },
+              { label: "Total Members", val: allMembers.length, icon: GraduationCap },
               { label: "Verified Alumni", val: totalVerified, icon: UserCheck },
               { label: "Life Members", val: totalLife, icon: Award },
               { label: "Global Network", val: totalAbroad, icon: Globe },

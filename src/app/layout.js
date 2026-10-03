@@ -184,7 +184,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={inter.variable} style={{ scrollBehavior: "smooth" }}>
+    <html lang="en" className={inter.variable} style={{ scrollBehavior: "smooth" }} suppressHydrationWarning>
       <head>
         {/* Preconnect for fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -311,7 +311,7 @@ export default function RootLayout({ children }) {
           }}
         />
       </head>
-      <body style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      <body suppressHydrationWarning style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
         <AppProviders>
           <Navbar />
           <main style={{ flex: 1 }}>{children}</main>

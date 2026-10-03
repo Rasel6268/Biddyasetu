@@ -98,6 +98,7 @@ export default function Navbar() {
 
   return (
     <header
+      suppressHydrationWarning
       className={`sticky top-0 z-[100] transition-all duration-500 ${scrolled
           ? "bg-white/95 backdrop-blur-md border-b border-sky-100/80 shadow-lg shadow-sky-900/5"
           : "bg-gradient-to-r from-[#FDF9DF]/95 via-[#FDF9DF]/90 to-[#FDF9DF]/95 backdrop-blur-sm border-b border-sky-100/30"

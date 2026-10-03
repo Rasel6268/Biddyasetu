@@ -237,7 +237,7 @@ export default function DonationCTA() {
               </div>
 
               <div style={{ marginTop: "1.75rem", paddingTop: "1rem", borderTop: "1px solid rgba(255,255,255,0.15)", display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.8rem", color: "rgba(255,255,255,0.8)" }}>
-                <ShieldCheck size={16} color="#4ade80" /> Sonali Bank Official Welfare Account
+                <ShieldCheck size={16} color="#4ade80" /> Rupali Bank PLC Official Welfare Account
               </div>
             </div>
           </ScrollAnimation>

@@ -67,7 +67,7 @@ export default function AdminSettingsPage() {
             </label>
             <input
               type="text"
-              defaultValue="Sonali Bank, Kaitola Br, A/C: 34091823"
+              defaultValue="Rupali Bank PLC, Nakalia Br, A/C: 3822010022341 (Routing: 185761635)"
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium"
             />
           </div>

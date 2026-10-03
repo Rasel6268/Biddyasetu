@@ -207,12 +207,12 @@ export default function AboutPage() {
             {/* Mission Card */}
             <div className="group bg-white rounded-2xl border border-slate-200 p-8 transition-all hover:shadow-xl hover:shadow-sky-500/5 hover:-translate-y-1">
               <div className="relative">
-                <div className="absolute -inset-1 bg-gradient-to-r from-sky-500 to-sky-600 rounded-2xl opacity-0 group-hover:opacity-20 transition-opacity blur-xl" />
+                <div className="absolute -inset-1 bg-linear-to-r from-sky-500 to-sky-600 rounded-2xl opacity-0 group-hover:opacity-20 transition-opacity blur-xl" />
                 <div className="relative">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-50 to-sky-100 flex items-center justify-center mb-5">
+                  <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-sky-50 to-sky-100 flex items-center justify-center mb-5">
                     <Target size={28} className="text-sky-600" />
                   </div>
-                  <div className="w-12 h-1 bg-gradient-to-r from-sky-500 to-sky-400 rounded-full mb-4" />
+                  <div className="w-12 h-1 bg-linear-to-r from-sky-500 to-sky-400 rounded-full mb-4" />
                   <h3 className="text-2xl font-extrabold text-slate-900 mb-3">Our Mission</h3>
                   <p className="text-slate-600 leading-relaxed text-base">
                     {orgInfo.mission}
@@ -224,12 +224,12 @@ export default function AboutPage() {
             {/* Vision Card */}
             <div className="group bg-white rounded-2xl border border-slate-200 p-8 transition-all hover:shadow-xl hover:shadow-amber-500/5 hover:-translate-y-1">
               <div className="relative">
-                <div className="absolute -inset-1 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-2xl opacity-0 group-hover:opacity-20 transition-opacity blur-xl" />
+                <div className="absolute -inset-1 bg-linear-to-r from-amber-400 to-yellow-500 rounded-2xl opacity-0 group-hover:opacity-20 transition-opacity blur-xl" />
                 <div className="relative">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-50 to-yellow-100 flex items-center justify-center mb-5">
+                  <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-amber-50 to-yellow-100 flex items-center justify-center mb-5">
                     <Eye size={28} className="text-amber-600" />
                   </div>
-                  <div className="w-12 h-1 bg-gradient-to-r from-amber-500 to-yellow-400 rounded-full mb-4" />
+                  <div className="w-12 h-1 bg-linear-to-r from-amber-500 to-yellow-400 rounded-full mb-4" />
                   <h3 className="text-2xl font-extrabold text-slate-900 mb-3">Our Vision</h3>
                   <p className="text-slate-600 leading-relaxed text-base">
                     {orgInfo.vision}
@@ -242,7 +242,7 @@ export default function AboutPage() {
       </section>
 
       {/* Core Values - Enhanced */}
-      <section id="values" className="py-16 md:py-20 bg-gradient-to-b from-slate-50 to-white">
+      <section id="values" className="py-16 md:py-20 bg-linear-to-b from-slate-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-600 text-xs font-bold uppercase tracking-wider mb-3">
@@ -273,7 +273,7 @@ export default function AboutPage() {
                   key={val.title}
                   className="group bg-white rounded-2xl border border-slate-200 p-6 transition-all hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 hover:border-slate-300"
                 >
-                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${c.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                  <div className={`w-14 h-14 rounded-2xl bg-linear-to-br ${c.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                     <Icon size={24} className={c.text} />
                   </div>
                   <h3 className="font-extrabold text-lg text-slate-900 mb-2">
@@ -306,7 +306,7 @@ export default function AboutPage() {
 
           <div className="relative pl-8 md:pl-10">
             {/* Vertical timeline line with gradient */}
-            <div className="absolute left-2.5 md:left-3.5 top-0 bottom-0 w-0.5 bg-gradient-to-b from-sky-400 via-sky-200 to-slate-200 rounded-full" />
+            <div className="absolute left-2.5 md:left-3.5 top-0 bottom-0 w-0.5 bg-linear-to-b from-sky-400 via-sky-200 to-slate-200 rounded-full" />
 
             {timeline.map((item, i) => (
               <div key={i} className="relative pb-10 last:pb-0 group">
@@ -342,7 +342,7 @@ export default function AboutPage() {
       </section>
 
       {/* Call to Action Section */}
-      <section className="py-16 md:py-20 bg-gradient-to-br from-sky-600 to-sky-700 relative overflow-hidden">
+      <section className="py-16 md:py-20 bg-linear-to-br from-sky-600 to-sky-700 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
           <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#fde047]/10 rounded-full blur-3xl" />
