@@ -51,11 +51,11 @@ export const timeline = [
 export const committeeRoles = [
   {
     role: "President",
-    name: "Md. Rafiqul Islam",
+    name: "Mirza S. J. Sohel",
     batch: "1998",
     image: "https://res.cloudinary.com/doumlnejx/image/upload/v1782845801/WhatsApp_Image_2026-06-30_at_11.36.19_PM_l61vdy.jpg",
-    email: "rafiqul.islam@biddyasetu.org",
-    phone: "+880 1712-345678",
+    email: "Sohel@biddyasetu.org",
+    phone: "01712769283",
     location: "Dhaka, Bangladesh",
     company: "Islam Group of Industries",
     memberId: "BDS-PRES-001",
@@ -83,11 +83,41 @@ export const committeeRoles = [
   },
   {
     role: "Vice President",
-    name: "Ms. Sultana Begum",
+    name: "Md. Afan Ali",
     batch: "2000",
     image: null,
-    email: "sultana.begum@biddyasetu.org",
-    phone: "+880 1812-345678",
+    email: "afanali@biddyasetu.org",
+    phone: "01733171905",
+    location: "Chittagong, Bangladesh",
+    company: "Begum Foundation",
+    memberId: "BDS-VP-002",
+    verified: true,
+    joinDate: "March 2011",
+    term: "2024-2026",
+    bio: "Passionate educator and social worker dedicated to women's empowerment and educational reform.",
+    responsibilities: [
+      "Supporting the President in organizational duties",
+      "Overseeing women's affairs and social welfare programs",
+      "Coordinating with international alumni chapters"
+    ],
+    achievements: [
+      "Women Empowerment Award 2021",
+      "Educational Innovation Grant Recipient",
+      "Keynote speaker at National Education Summit"
+    ],
+    social: {
+      linkedin: "https://linkedin.com/in/sultanabegum",
+      facebook: "https://facebook.com/sultanabegum"
+    },
+    interests: ["Women's Rights", "Education Policy", "Social Work", "Literature"]
+  },
+  {
+    role: "Vice President",
+    name: "Md. Shahidul Haque",
+    batch: "2000",
+    image: null,
+    email: "Shahidulhaque@biddyasetu.org",
+    phone: "01722456078",
     location: "Chittagong, Bangladesh",
     company: "Begum Foundation",
     memberId: "BDS-VP-002",
@@ -113,11 +143,11 @@ export const committeeRoles = [
   },
   {
     role: "General Secretary",
-    name: "Md. Kamal Hossain",
+    name: "Emdadul Haque Hero",
     batch: "2002",
     image: null,
-    email: "kamal.hossain@biddyasetu.org",
-    phone: "+880 1912-345678",
+    email: "emdadul@biddyasetu.org",
+    phone: "01711015094",
     location: "Dhaka, Bangladesh",
     company: "Hossain & Associates",
     memberId: "BDS-GS-003",
@@ -1523,23 +1553,20 @@ export const galleryImages = [
   { id: 6, title: "School Sports Day", category: "Event", color: "#d97706" },
 ];
 
-export const batches = [
-  "SSC 1988", "SSC 1990", "SSC 1992", "SSC 1994", "SSC 1996",
-  "SSC 1998", "SSC 2000", "SSC 2002", "SSC 2004", "SSC 2006",
-  "SSC 2008", "SSC 2010", "SSC 2012", "SSC 2014", "SSC 2016",
-  "SSC 2018", "SSC 2020", "SSC 2022", "SSC 2024",
-];
-
+export const batches = Array.from(
+  { length: 2050 - 1980 + 1 },
+  (_, i) => `SSC ${1980 + i}`
+);
 export const membershipTypes = [
   {
     name: "General Member",
-    fee: "BDT 1000 / year",
+    fee: "BDT 1100 / year",
     features: ["Directory listing", "Event access", "Newsletter"],
     color: "var(--primary)",
   },
   {
     name: "Life Member",
-    fee: "BDT 20000 (one-time)",
+    fee: "BDT 50000 (one-time)",
     features: ["All General benefits", "Voting rights", "Priority scholarship support", "Recognition certificate"],
     color: "var(--secondary-dark)",
     popular: true,

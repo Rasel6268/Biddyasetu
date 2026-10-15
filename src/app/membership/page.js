@@ -1026,21 +1026,18 @@ export default function MembershipPage() {
                           </p>
                         </div>
 
-                        {/* Current Address (US/International) */}
+
+                        {/* Current Address (Bangladesh / International) — OPTIONAL */}
                         <div className="bg-sky-50/50 rounded-xl p-4 border border-sky-100">
                           <h4 className="text-sm font-bold text-[var(--text)] flex items-center gap-2 mb-3">
-                            <Building2
-                              size={16}
-                              className="text-[var(--primary)]"
-                            />
-                            Current Address (US/International)
+                            <Building2 size={16} className="text-[var(--primary)]" />
+                            Current Address (Bangladesh / International)
+                            <span className="ml-auto text-[10px] font-semibold text-slate-400 uppercase tracking-wider bg-white px-2 py-0.5 rounded-full border border-slate-200">
+                              Optional
+                            </span>
                           </h4>
                           <div className="space-y-3">
-                            <FormGroup
-                              label="Address Line 1"
-                              required
-                              icon={Home}
-                            >
+                            <FormGroup label="Address Line 1" icon={Home}>
                               <input
                                 type="text"
                                 placeholder="Street address, P.O. box"
@@ -1052,7 +1049,6 @@ export default function MembershipPage() {
                                   })
                                 }
                                 className="w-full px-4 py-3 pl-10 rounded-xl border-2 border-[var(--border)] bg-white text-sm text-[var(--text)] outline-none transition-all duration-200 focus:border-[var(--primary)] focus:shadow-[0_0_0_4px_rgba(6,163,236,0.1)] hover:border-[var(--primary)]/50"
-                                required
                               />
                             </FormGroup>
 
@@ -1072,7 +1068,7 @@ export default function MembershipPage() {
                             </FormGroup>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              <FormGroup label="City" required icon={MapPinned}>
+                              <FormGroup label="City" icon={MapPinned}>
                                 <input
                                   type="text"
                                   placeholder="City"
@@ -1084,18 +1080,13 @@ export default function MembershipPage() {
                                     })
                                   }
                                   className="w-full px-4 py-3 pl-10 rounded-xl border-2 border-[var(--border)] bg-white text-sm text-[var(--text)] outline-none transition-all duration-200 focus:border-[var(--primary)] focus:shadow-[0_0_0_4px_rgba(6,163,236,0.1)] hover:border-[var(--primary)]/50"
-                                  required
                                 />
                               </FormGroup>
 
-                              <FormGroup
-                                label="State"
-                                required
-                                icon={MapPinned}
-                              >
+                              <FormGroup label="State / Division / Province" icon={MapPinned}>
                                 <input
                                   type="text"
-                                  placeholder="e.g. New York, California, Texas"
+                                  placeholder="e.g. Dhaka, New York, California, London"
                                   value={currentAddress.state}
                                   onChange={(e) =>
                                     setCurrentAddress({
@@ -1104,20 +1095,15 @@ export default function MembershipPage() {
                                     })
                                   }
                                   className="w-full px-4 py-3 pl-10 rounded-xl border-2 border-[var(--border)] bg-white text-sm text-[var(--text)] outline-none transition-all duration-200 focus:border-[var(--primary)] focus:shadow-[0_0_0_4px_rgba(6,163,236,0.1)] hover:border-[var(--primary)]/50"
-                                  required
                                 />
                               </FormGroup>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              <FormGroup
-                                label="ZIP Code"
-                                required
-                                icon={LocateFixed}
-                              >
+                              <FormGroup label="ZIP / Postal Code" icon={LocateFixed}>
                                 <input
                                   type="text"
-                                  placeholder="ZIP code"
+                                  placeholder="ZIP / Postal code"
                                   value={currentAddress.zipCode}
                                   onChange={(e) =>
                                     setCurrentAddress({
@@ -1126,11 +1112,10 @@ export default function MembershipPage() {
                                     })
                                   }
                                   className="w-full px-4 py-3 pl-10 rounded-xl border-2 border-[var(--border)] bg-white text-sm text-[var(--text)] outline-none transition-all duration-200 focus:border-[var(--primary)] focus:shadow-[0_0_0_4px_rgba(6,163,236,0.1)] hover:border-[var(--primary)]/50"
-                                  required
                                 />
                               </FormGroup>
 
-                              <FormGroup label="Country" required icon={Globe}>
+                              <FormGroup label="Country" icon={Globe}>
                                 <select
                                   value={currentAddress.country}
                                   onChange={(e) =>
@@ -1140,7 +1125,6 @@ export default function MembershipPage() {
                                     })
                                   }
                                   className="w-full px-4 py-3 pl-10 rounded-xl border-2 border-[var(--border)] bg-white text-sm text-[var(--text)] outline-none transition-all duration-200 focus:border-[var(--primary)] focus:shadow-[0_0_0_4px_rgba(6,163,236,0.1)] appearance-none hover:border-[var(--primary)]/50"
-                                  required
                                 >
                                   {countries.map((c) => (
                                     <option key={c} value={c}>

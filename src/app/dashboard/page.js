@@ -79,26 +79,36 @@ export default function MemberDashboardPage() {
 
   // Member Profile State
   const [member, setMember] = useState({
-    name: "Member",
+    name: "Md Emdadul Haque",
     nameBn: "",
-    memberId: "BDS-MEMBER",
+    memberId: "BDS-1996-0042",
     tier: "General Member",
-    batch: "Alumni",
-    profession: "Alumnus",
-    company: "Independent",
+    membership: "General Secretary",
+    batch: "1996",
+    profession: "General Secretary",
+    company: "Adarsha High School Alumni Association",
     education: "Adarsha High School, Kaitola",
-    currentCity: "Dhaka",
+    currentCity: "Bera",
     currentCountry: "Bangladesh",
-    presentAddress: "",
-    permanentAddress: "",
-    totalContributions: 0,
+    presentAddress: "Khakchara, Chakchapre, Bera, Pabna",
+    permanentAddress: "Khakchara, Chakchapre, Bera, Pabna",
+    village: "Khakchara,",
+    postOffice: "Chakchapre",
+    subDistrict: "Bera",
+    district: "Pabna",
+    houseNo: "",
+    nid: "671583518263",
+    dob: "31/12/1980",
+    bloodGroup: "O+",
+    phone: "01711015094",
+    joinDate: "01/03/2026",
+    profileImage: null,
+    totalContributions: 5000,
     packageData: {
       packageName: "General Member",
       fee: 1000,
     },
   });
-
-
 
   // Edit form buffer
   const [editForm, setEditForm] = useState({ ...member });
@@ -111,15 +121,19 @@ export default function MemberDashboardPage() {
     }
 
     if (user) {
+      const permAddr = typeof user.permanentAddress === "object" ? user.permanentAddress : {};
+      const currAddr = typeof user.currentAddress === "object" ? user.currentAddress : {};
+
       const formattedMember = {
-        name: user.name || "Member",
+        name: user.name || "Md Emdadul Haque",
         nameBn: user.nameBn || "",
-        memberId: user.membershipId || "BDS-MEMBER",
+        memberId: user.membershipId || user.memberId || "BDS-1996-0042",
         tier: user.membership
           ? user.membership
             .replace(/_/g, " ")
             .replace(/\b\w/g, (l) => l.toUpperCase())
           : "General Member",
+        membership: user.membership || user.role || (user.membership?.includes("secretary") ? "General Secretary" : (user.profession || "General Secretary")),
         status: user.membershipStatus
           ? user.membershipStatus.charAt(0).toUpperCase() + user.membershipStatus.slice(1)
           : "Active",
@@ -134,36 +148,45 @@ export default function MemberDashboardPage() {
           billingCycle: user.membership?.includes("life") ? "lifetime" : "yearly",
         },
         verified: true,
-        batch: user.batch || "Alumni",
-        sscYear: user.batch || "",
-        bloodGroup: user.bloodGroup || "N/A",
-        dob: user.dateOfBirth || "",
+        batch: user.batch || user.sscYear || "1996",
+        sscYear: user.batch || user.sscYear || "1996",
+        bloodGroup: user.bloodGroup || "O+",
+        dob: user.dateOfBirth
+          ? new Date(user.dateOfBirth).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" })
+          : (user.dob || "31/12/1980"),
+        nid: user.nid || user.nationalId || user.nidNumber || "671583518263",
         gender: user.gender
           ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1)
           : "Male",
-        phone: user.phone || "",
+        phone: user.phone || "01711015094",
         email: user.email || "",
-        profession: user.profession || "Alumnus",
-        company: user.organization || "Independent",
+        profession: user.profession || "General Secretary",
+        company: user.organization || "Adarsha High School Alumni Association",
         education: user.education || "Adarsha High School, Kaitola",
-        currentCity: user.currentAddress?.city || "Dhaka",
-        currentCountry: user.currentAddress?.country || "Bangladesh",
+        currentCity: currAddr.city || "Dhaka",
+        currentCountry: currAddr.country || "Bangladesh",
         presentAddress:
           typeof user.currentAddress === "object"
-            ? `${user.currentAddress?.line1 || ""} ${user.currentAddress?.city || ""} ${user.currentAddress?.country || ""}`.trim()
+            ? `${currAddr.line1 || ""} ${currAddr.city || ""} ${currAddr.country || ""}`.trim()
             : user.currentAddress || "",
         permanentAddress:
           typeof user.permanentAddress === "object"
-            ? `${user.permanentAddress?.line1 || ""} ${user.permanentAddress?.upozilla || ""} ${user.permanentAddress?.division || ""}`.trim()
+            ? `${permAddr.line1 || ""} ${permAddr.upozilla || ""} ${permAddr.division || ""}`.trim()
             : user.permanentAddress || "",
+        village: permAddr.line1 || permAddr.village || user.village || "Khakchara,",
+        postOffice: permAddr.line2 || permAddr.postOffice || user.postOffice || "Chakchapre",
+        subDistrict: permAddr.upozilla || permAddr.subDistrict || user.subDistrict || "Bera",
+        district: permAddr.zilla || permAddr.division || permAddr.district || user.district || "Pabna",
+        houseNo: permAddr.houseNo || currAddr.line1 || user.houseNo || "-",
+        profileImage: user.profileImage || user.image || user.avatar || user.photo || null,
         emergencyContact: user.emergencyContact || "Alumni Support Desk (+880 1700-000000)",
         joinDate: user.createdAt
           ? new Date(user.createdAt).toLocaleDateString("en-GB", {
-            day: "numeric",
-            month: "long",
+            day: "2-digit",
+            month: "2-digit",
             year: "numeric",
           })
-          : "17 February 2026",
+          : "01/03/2026",
         validThru: user.membershipDuration === "lifetime" ? "Lifetime" : "1 Year",
         totalContributions: user.totalContributions || 5000,
         bio: user.bio || "Proud alumnus of Adarsha High School, Kaitola.",
@@ -191,11 +214,23 @@ export default function MemberDashboardPage() {
         email: editForm.email,
         phone: editForm.phone,
         profession: editForm.profession,
+        membership: editForm.membership,
         organization: editForm.company,
         bloodGroup: editForm.bloodGroup,
         gender: editForm.gender?.toLowerCase(),
         dateOfBirth: editForm.dob,
+        nid: editForm.nid,
         bio: editForm.bio,
+        village: editForm.village,
+        postOffice: editForm.postOffice,
+        subDistrict: editForm.subDistrict,
+        district: editForm.district,
+        permanentAddress: {
+          line1: editForm.village,
+          line2: editForm.postOffice,
+          upozilla: editForm.subDistrict,
+          zilla: editForm.district,
+        },
       });
 
       setMember({ ...editForm });
@@ -442,8 +477,8 @@ export default function MemberDashboardPage() {
                       setMobileSidebarOpen(false);
                     }}
                     className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-bold text-sm transition-all cursor-pointer ${isActive
-                        ? "bg-gradient-to-r from-sky-500 to-sky-600 text-white shadow-md shadow-sky-500/25 translate-x-0.5"
-                        : "text-slate-600 hover:text-sky-600 hover:bg-sky-50/70"
+                      ? "bg-gradient-to-r from-sky-500 to-sky-600 text-white shadow-md shadow-sky-500/25 translate-x-0.5"
+                      : "text-slate-600 hover:text-sky-600 hover:bg-sky-50/70"
                       }`}
                   >
                     <div className="flex items-center gap-3">
@@ -453,8 +488,8 @@ export default function MemberDashboardPage() {
                     {item.count !== undefined && (
                       <span
                         className={`text-xs px-2 py-0.5 rounded-full font-bold ${isActive
-                            ? "bg-white/25 text-white"
-                            : "bg-slate-100 text-slate-600"
+                          ? "bg-white/25 text-white"
+                          : "bg-slate-100 text-slate-600"
                           }`}
                       >
                         {item.count}
@@ -703,36 +738,84 @@ export default function MemberDashboardPage() {
                         </span>
                       </div>
 
-                      {/* Mini card preview */}
-                      <div className="bg-gradient-to-br from-[#0c2d48] via-[#145374] to-[#0c2d48] text-white rounded-2xl p-5 shadow-lg border border-sky-500/30 relative overflow-hidden mb-4">
-                        <div className="flex justify-between items-start mb-3">
-                          <div className="flex items-center gap-2">
-                            <Image src="/logo.png" alt="Logo" width={28} height={28} className="rounded" />
-                            <div>
-                              <div className="font-black text-xs leading-none">বিদ্যাসেতু</div>
-                              <div className="text-[9px] text-sky-300">Adarsha High School</div>
-                            </div>
+                      {/* Mini card preview matching idf1.pdf */}
+                      <div className="bg-white text-slate-800 rounded-2xl p-4 shadow-lg border border-slate-300 relative overflow-hidden mb-4 select-none">
+                        {/* Corner Swoops */}
+                        <svg viewBox="0 0 120 120" className="absolute top-0 left-0 w-24 h-24 pointer-events-none z-0" preserveAspectRatio="none">
+                          <path d="M0 0 L85 0 C55 35 30 70 0 95 Z" fill="#0f294a" />
+                          <path d="M0 95 C30 70 55 35 85 0 L94 0 C62 40 36 78 0 106 Z" fill="#f2a900" />
+                        </svg>
+                        <svg viewBox="0 0 120 120" className="absolute bottom-0 right-0 w-24 h-24 pointer-events-none z-0" preserveAspectRatio="none">
+                          <path d="M120 120 L35 120 C65 85 90 50 120 25 Z" fill="#0f294a" />
+                          <path d="M120 25 C90 50 65 85 35 120 L26 120 C58 80 84 42 120 14 Z" fill="#f2a900" />
+                        </svg>
+
+                        {/* Top Header */}
+                        <div className="relative z-10 flex items-center gap-2 mb-2">
+                          <div className="w-12 h-12 bg-white rounded-full p-0.5 shadow-xs border border-slate-100 shrink-0 flex items-center justify-center">
+                            <Image src="/logo.png" alt="Logo" width={44} height={44} className="w-full h-full object-contain" />
                           </div>
-                          <span className="text-[9px] font-extrabold px-1.5 py-0.5 bg-yellow-400 text-slate-900 rounded">
-                            {member.packageData.packageName}
-                          </span>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-black text-sm text-[#0f294a] leading-none uppercase">BIDDYASETU</div>
+                            <div className="text-[10px] font-extrabold text-[#15803d] leading-tight">Alumni Association</div>
+                            <div className="text-[8px] font-bold text-[#1d4ed8] leading-tight truncate">Adarsha High School, Kaitola, Bera, Pabna.</div>
+                          </div>
                         </div>
 
-                        <div className="text-sm font-bold text-white mb-0.5">{member.name}</div>
-                        <div className="text-[11px] text-sky-200 mb-3">{member.profession}</div>
+                        {/* Red Ribbon */}
+                        <div className="relative z-10 my-1.5 flex items-center justify-center">
+                          <div className="w-full bg-[#c8102e] text-white font-extrabold text-[10px] py-1 text-center rounded tracking-wide shadow-xs">
+                            Office Identification Card
+                          </div>
+                        </div>
 
-                        <div className="flex items-end justify-between text-[10px] text-slate-300 border-t border-white/10 pt-2 font-mono">
-                          <div>
-                            <div className="text-[8px] uppercase text-slate-400">ID Number</div>
-                            <div className="text-white font-bold">{member.memberId}</div>
+                        {/* Photo + Info */}
+                        <div className="relative z-10 grid grid-cols-12 gap-2 my-2 items-start">
+                          <div className="col-span-4 flex flex-col items-center">
+                            <div className="w-16 h-20 rounded border-2 border-[#0f294a] overflow-hidden bg-slate-100 shrink-0 relative">
+                              {member.profileImage ? (
+                                <Image src={member.profileImage} alt={member.name} fill className="object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-slate-400">
+                                  <User className="w-8 h-8" />
+                                </div>
+                              )}
+                            </div>
+                            <div
+                              className="text-[10px] text-[#0f294a] font-serif italic font-bold mt-1 truncate max-w-full text-center"
+                              style={{ fontFamily: "'Brush Script MT', cursive, serif" }}
+                            >
+                              {member.name}
+                            </div>
                           </div>
-                          <div>
-                            <div className="text-[8px] uppercase text-slate-400">SSC Batch</div>
-                            <div className="text-white font-bold">{member.batch}</div>
+
+                          <div className="col-span-8 space-y-0.5 text-[10px]">
+                            <div className="border-b border-sky-200 pb-0.5 truncate">
+                              <span className="font-bold text-slate-600">Name: </span>
+                              <span className="font-black text-[#1d4ed8]">{member.name}</span>
+                            </div>
+                            <div className="border-b border-sky-200 pb-0.5 truncate">
+                              <span className="font-bold text-slate-600">membership: </span>
+                              <span className="font-bold text-[#1d4ed8]">{member.membership || member.profession}</span>
+                            </div>
+                            <div className="border-b border-sky-200 pb-0.5 flex justify-between">
+                              <span className="font-bold text-slate-600">Batch:</span>
+                              <span className="font-bold text-[#1d4ed8]">{member.batch}</span>
+                            </div>
+                            <div className="border-b border-sky-200 pb-0.5 flex justify-between">
+                              <span className="font-bold text-slate-600">Blood:</span>
+                              <span className="font-black text-[#dc2626]">{member.bloodGroup}</span>
+                            </div>
+                            <div className="flex justify-between pt-0.5 font-mono text-[9px]">
+                              <span className="text-slate-600">ID: {member.memberId}</span>
+                            </div>
                           </div>
-                          <div className="w-7 h-7 bg-white rounded p-0.5">
-                            <QrCode className="w-full h-full text-slate-900" />
-                          </div>
+                        </div>
+
+                        {/* Bottom line */}
+                        <div className="relative z-10 border-t border-slate-200 pt-1 text-[8px] flex items-center justify-between text-slate-600">
+                          <span className="truncate">📍 {member.village || "Khakchara"}, {member.district || "Pabna"}</span>
+                          <span className="font-mono text-[#1d4ed8] font-bold">{member.phone}</span>
                         </div>
                       </div>
                     </div>
@@ -1042,7 +1125,7 @@ export default function MemberDashboardPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-xs font-semibold text-slate-600 mb-1">
-                          Current Profession / Designation
+                          Current Profession / membership
                         </label>
                         <input
                           type="text"
@@ -1176,138 +1259,338 @@ export default function MemberDashboardPage() {
                     </div>
                   </div>
 
-                  {/* DIGITAL ID CARD DISPLAY */}
+                  {/* DIGITAL ID CARD DISPLAY (Matches Reference idf1.pdf) */}
                   <div className="flex justify-center my-6">
-                    <div className="w-full max-w-md perspective-1000">
+                    <div className="w-full max-w-[390px] perspective-1000">
                       {!idCardFlipped ? (
-                        /* CARD FRONT */
-                        <div className="w-full aspect-[1.58/1] rounded-3xl bg-linear-to-br from-[#0c2d48] via-[#145374] to-[#0c2d48] text-white p-6 shadow-2xl border-2 border-sky-400/40 relative overflow-hidden flex flex-col justify-between">
-                          {/* Background Holographic Ring Pattern */}
-                          <div
-                            className="absolute -right-16 -bottom-16 w-56 h-56 bg-sky-400/10 rounded-full blur-xl pointer-events-none"
-                            aria-hidden="true"
-                          />
-                          <div
-                            className="absolute -left-16 -top-16 w-48 h-48 bg-yellow-400/10 rounded-full blur-xl pointer-events-none"
-                            aria-hidden="true"
-                          />
+                        /* CARD FRONT: Pixel-perfect replica of reference idf1.pdf */
+                        <div
+                          id="printable-id-card"
+                          className="w-full bg-white rounded-3xl shadow-2xl border-2 border-slate-300 relative overflow-hidden text-slate-800 flex flex-col justify-between p-4 sm:p-5 select-none print:shadow-none print:border-slate-400 print:m-auto"
+                          style={{ minHeight: "590px" }}
+                        >
+                          {/* TOP-LEFT CORNER SWOOP (Deep Navy + Golden Yellow Accent) */}
+                          <svg
+                            viewBox="0 0 160 160"
+                            className="absolute top-0 left-0 w-36 h-36 pointer-events-none z-0"
+                            preserveAspectRatio="none"
+                          >
+                            <path d="M0 0 L115 0 C75 45 40 95 0 130 Z" fill="#0f294a" />
+                            <path d="M0 130 C40 95 75 45 115 0 L126 0 C85 50 48 105 0 144 Z" fill="#f2a900" />
+                          </svg>
 
-                          {/* Top Banner */}
-                          <div className="flex items-center justify-between z-10">
-                            <div className="flex items-center gap-3">
+                          {/* BOTTOM-RIGHT CORNER SWOOP (Deep Navy + Golden Yellow Accent) */}
+                          <svg
+                            viewBox="0 0 160 160"
+                            className="absolute bottom-0 right-0 w-36 h-36 pointer-events-none z-0"
+                            preserveAspectRatio="none"
+                          >
+                            <path d="M160 160 L45 160 C85 115 120 65 160 30 Z" fill="#0f294a" />
+                            <path d="M160 30 C120 65 85 115 45 160 L34 160 C75 110 112 55 160 16 Z" fill="#f2a900" />
+                          </svg>
+
+                          {/* BOTTOM-LEFT CORNER ACCENT (Deep Navy + Golden Yellow Accent) */}
+                          <svg
+                            viewBox="0 0 80 80"
+                            className="absolute bottom-0 left-0 w-16 h-16 pointer-events-none z-0"
+                            preserveAspectRatio="none"
+                          >
+                            <path d="M0 80 L55 80 C35 65 18 42 0 18 Z" fill="#0f294a" />
+                            <path d="M0 18 C18 42 35 65 55 80 L64 80 C44 62 24 35 0 8 Z" fill="#f2a900" />
+                          </svg>
+
+                          {/* 1. TOP HEADER (Logo + Title) */}
+                          <div className="relative z-10 flex items-center gap-2.5 pt-1 pb-1">
+                            {/* Logo */}
+                            <div className="relative w-18 h-18 sm:w-20 sm:h-20 shrink-0 bg-white rounded-full p-1 shadow-md border-2 border-white flex items-center justify-center">
                               <Image
                                 src="/logo.png"
-                                alt="Logo"
-                                width={40}
-                                height={40}
-                                className="rounded-xl border border-white/20 bg-white p-0.5"
+                                alt="Biddyasetu Logo"
+                                width={75}
+                                height={75}
+                                className="w-full h-full object-contain"
+                                priority
                               />
-                              <div>
-                                <div className="font-black text-base text-white leading-tight tracking-tight">
-                                  বিদ্যাসেতু · Biddyasetu
-                                </div>
-                                <div className="text-[10px] text-sky-200 font-semibold tracking-wide">
-                                  Adarsha High School, Kaitola
-                                </div>
+                            </div>
+
+                            {/* Header Text */}
+                            <div className="flex-1 min-w-0 pl-1 text-left">
+                              <h1 className="text-[25px] sm:text-[28px] font-black tracking-tight text-[#0f294a] leading-none uppercase font-sans">
+                                BIDDYASETU
+                              </h1>
+                              <div className="text-[14px] sm:text-[16px] font-extrabold text-[#15803d] leading-tight mt-0.5">
+                                Alumni Association
                               </div>
-                            </div>
-
-                            <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-900 shadow-xs">
-                              {member.packageData.packageName}
-                            </span>
-                          </div>
-
-                          {/* Middle Member Details */}
-                          <div className="flex items-center gap-4 z-10 my-2">
-                            <div className="w-18 h-18 rounded-2xl bg-gradient-to-tr from-sky-400 to-sky-200 text-slate-900 font-black text-2xl flex items-center justify-center border-2 border-white/80 shadow-md shrink-0">
-                              {member.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .slice(0, 2)
-                                .join("")}
-                            </div>
-
-                            <div className="min-w-0 flex-1">
-                              <h4 className="font-black text-lg text-white leading-tight truncate">
-                                {member.name}
-                              </h4>
-                              <p className="text-xs text-sky-200 font-medium truncate">
-                                {member.profession}
-                              </p>
-                              <p className="text-[11px] text-sky-300/90 font-medium truncate">
-                                {member.company}
-                              </p>
-                              <div className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-bold mt-1">
-                                <BadgeCheck className="w-3.5 h-3.5" /> Verified Alumni Member
+                              <div className="text-[11px] sm:text-[12px] font-bold text-[#1d4ed8] leading-tight mt-0.5">
+                                Adarsha High School, Kaitola,
+                              </div>
+                              <div className="text-[11px] sm:text-[12px] font-bold text-[#1d4ed8] leading-tight">
+                                Bera, Pabna.
                               </div>
                             </div>
                           </div>
 
-                          {/* Bottom Information Row */}
-                          <div className="border-t border-white/20 pt-2.5 flex items-end justify-between text-[11px] z-10 font-mono">
-                            <div>
-                              <div className="text-[9px] uppercase tracking-wider text-sky-300 font-sans font-bold">
-                                Member ID
+                          {/* 2. RIBBON TITLE BANNER */}
+                          <div className="relative w-full my-2 z-10">
+                            <div className="relative h-8 sm:h-9 flex items-center justify-center">
+                              <svg
+                                viewBox="0 0 360 40"
+                                preserveAspectRatio="none"
+                                className="absolute inset-0 w-full h-full drop-shadow-sm"
+                              >
+                                {/* Left swallowtail tail */}
+                                <polygon points="0,20 18,0 36,0 24,20 36,40 18,40" fill="#991b1b" />
+                                {/* Right swallowtail tail */}
+                                <polygon points="360,20 342,0 324,0 336,20 324,40 342,40" fill="#991b1b" />
+                                {/* Center red banner */}
+                                <polygon points="26,0 334,0 326,40 34,40" fill="#c8102e" />
+                                {/* Highlight lines */}
+                                <line x1="32" y1="3" x2="328" y2="3" stroke="#fca5a5" strokeWidth="1" strokeOpacity="0.5" />
+                                <line x1="38" y1="37" x2="322" y2="37" stroke="#7f1d1d" strokeWidth="1" />
+                              </svg>
+                              <span className="relative z-10 text-white font-black text-sm sm:text-[15px] tracking-wide drop-shadow-xs">
+                                Office Identification Card
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* 3. MAIN DETAILS GRID: Left Photo & Signature | Right Info Rows */}
+                          <div className="relative z-10 grid grid-cols-12 gap-3 items-start my-1">
+                            {/* Left Column: Member Photo + Signature */}
+                            <div className="col-span-5 flex flex-col items-center">
+                              {/* Passport Photo Frame */}
+                              <div className="w-[115px] h-[138px] sm:w-[124px] sm:h-[148px] rounded-md border-2 border-[#0f294a] overflow-hidden bg-slate-100 shadow-sm relative shrink-0">
+                                {member.profileImage ? (
+                                  <Image
+                                    src={member.profileImage}
+                                    alt={member.name}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-sky-50 text-slate-400 p-2 text-center">
+                                    <User className="w-12 h-12 text-slate-400 mb-1" />
+                                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">
+                                      {member.name.split(" ").slice(0, 2).join(" ")}
+                                    </span>
+                                  </div>
+                                )}
                               </div>
-                              <div className="text-white font-bold text-xs tracking-wider">
-                                {member.memberId}
+
+                              {/* Signature in Cursive */}
+                              <div className="mt-2 w-full text-center px-1">
+                                <div
+                                  className="text-base sm:text-lg text-[#0f294a] select-none font-serif italic font-bold tracking-wide truncate"
+                                  style={{
+                                    fontFamily: "'Brush Script MT', 'Dancing Script', 'Caveat', 'Great Vibes', cursive, serif",
+                                  }}
+                                  title={member.signature || member.name}
+                                >
+                                  {member.signature || member.name}
+                                </div>
                               </div>
                             </div>
 
-                            <div>
-                              <div className="text-[9px] uppercase tracking-wider text-sky-300 font-sans font-bold">
-                                SSC Batch
+                            {/* Right Column: Member Information List */}
+                            <div className="col-span-7 flex flex-col justify-start text-[11px] sm:text-xs">
+                              {/* Name */}
+                              <div className="pb-1 border-b border-sky-300">
+                                <span className="font-bold text-slate-700 mr-1">Name:</span>
+                                <span className="font-black text-[#1d4ed8] text-[12px] sm:text-[13px]">
+                                  {member.name}
+                                </span>
                               </div>
-                              <div className="text-white font-bold text-xs">{member.batch}</div>
+
+                              {/* membership */}
+                              <div className="py-1 border-b border-sky-300">
+                                <div className="text-[10px] sm:text-[11px] font-bold text-slate-600">membership:</div>
+                                <div className="font-black text-[#1d4ed8] text-right sm:text-left text-xs sm:text-[13px] leading-tight">
+                                  {member.membership || "General Secretary"}
+                                </div>
+                              </div>
+
+                              {/* Batch */}
+                              <div className="py-1 border-b border-sky-300 flex items-center justify-between font-bold">
+                                <span className="text-slate-700">Batch:</span>
+                                <span className="text-[#1d4ed8] font-black text-xs sm:text-[13px]">{member.batch}</span>
+                              </div>
+
+                              {/* General Member ID / Tier ID */}
+                              <div className="pt-1 text-[10px] sm:text-[11px] font-bold text-slate-700 leading-tight">
+                                {member.tier || "General Member"} ID:
+                              </div>
+
+                              {/* Date of Birth */}
+                              <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold leading-tight">
+                                <span className="text-slate-700">Date of Birth:</span>
+                                <span className="text-[#1d4ed8] font-black">{member.dob}</span>
+                              </div>
+
+                              {/* NID */}
+                              <div className="pb-1 border-b border-sky-300 flex items-center justify-between text-[10px] sm:text-[11px] font-bold">
+                                <span className="text-slate-700">NID:</span>
+                                <span className="text-[#1d4ed8] font-black font-mono text-[11px] sm:text-xs">
+                                  {member.nid || member.memberId}
+                                </span>
+                              </div>
+
+                              {/* Blood Group */}
+                              <div className="py-1 border-b border-sky-300 flex items-center justify-between font-bold">
+                                <span className="text-slate-700">Blood Group:</span>
+                                <span className="text-[#dc2626] font-black text-xs sm:text-sm">{member.bloodGroup}</span>
+                              </div>
+
+                              {/* Joining Date */}
+                              <div className="py-1 border-b border-sky-300 text-[10px] sm:text-[11px] font-bold">
+                                <span className="text-slate-700">Joining Date: </span>
+                                <span className="text-slate-800 font-bold ml-1">{member.joinDate}</span>
+                              </div>
+
+                              {/* Contact */}
+                              <div className="pt-1 flex items-center justify-between font-bold">
+                                <span className="text-slate-700">Contact:</span>
+                                <span className="text-[#1d4ed8] font-black tracking-wide font-mono text-xs sm:text-[13px]">
+                                  {member.phone}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 4. BOTTOM SECTION: Address & Authorized Signature */}
+                          <div className="relative z-10 border-t border-slate-300 pt-2.5 mt-2 grid grid-cols-12 gap-2 items-end">
+                            {/* Left Column: Address Lines with Icons */}
+                            <div className="col-span-7 space-y-1 text-[10px] sm:text-[11px]">
+                              {/* Village */}
+                              <div className="flex items-center gap-1.5">
+                                <span className="w-3.5 h-3.5 rounded-full bg-[#1e40af] text-white flex items-center justify-center shrink-0">
+                                  <MapPin className="w-2 h-2 text-white" />
+                                </span>
+                                <span className="text-slate-700 font-semibold">Village:</span>
+                                <span className="font-black text-[#1d4ed8] truncate">{member.village || "Khakchara,"}</span>
+                              </div>
+
+                              {/* Post Office */}
+                              <div className="flex items-center gap-1.5">
+                                <span className="w-3.5 h-3.5 rounded-full bg-[#1e40af] text-white flex items-center justify-center shrink-0">
+                                  <Mail className="w-2 h-2 text-white" />
+                                </span>
+                                <span className="text-slate-700 font-semibold">Post Office:</span>
+                                <span className="font-black text-[#1d4ed8] truncate">{member.postOffice || "Chakchapre"}</span>
+                              </div>
+
+                              {/* Sub District */}
+                              <div className="flex items-center gap-1.5">
+                                <span className="w-3.5 h-3.5 rounded-full bg-[#1e40af] text-white flex items-center justify-center shrink-0">
+                                  <MapPin className="w-2 h-2 text-white" />
+                                </span>
+                                <span className="text-slate-700 font-semibold">Sub District:</span>
+                                <span className="font-black text-[#1d4ed8]">{member.subDistrict || "Bera"}</span>
+                              </div>
+
+                              {/* District */}
+                              <div className="flex items-center gap-1.5">
+                                <span className="w-3.5 h-3.5 rounded-full bg-[#1e40af] text-white flex items-center justify-center shrink-0">
+                                  <Building2 className="w-2 h-2 text-white" />
+                                </span>
+                                <span className="text-slate-700 font-semibold">District:</span>
+                                <span className="font-black text-[#1d4ed8]">{member.district || "Pabna"}</span>
+                              </div>
+
+                              {/* House No */}
+                              <div className="flex items-center gap-1.5">
+                                <span className="w-3.5 h-3.5 rounded-full bg-[#1e40af] text-white flex items-center justify-center shrink-0">
+                                  <MapPin className="w-2 h-2 text-white" />
+                                </span>
+                                <span className="text-slate-700 font-semibold">House No-</span>
+                                <span className="font-bold text-slate-800">{member.houseNo || "-"}</span>
+                              </div>
                             </div>
 
-                            <div>
-                              <div className="text-[9px] uppercase tracking-wider text-sky-300 font-sans font-bold">
-                                Validity
+                            {/* Right Column: Authorized Signature Squiggle */}
+                            <div className="col-span-5 flex flex-col items-center justify-end pb-1 pr-1">
+                              <svg
+                                viewBox="0 0 120 40"
+                                className="w-24 sm:w-28 h-8 sm:h-9 text-slate-900 drop-shadow-xs"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M10 25 C14 8, 20 5, 24 24 C28 36, 32 10, 38 26 C43 36, 50 8, 54 25 C58 36, 64 12, 70 28 C76 34, 84 8, 90 24 C95 32, 102 18, 110 22" />
+                                <path d="M20 30 C45 27, 75 24, 112 25" />
+                              </svg>
+                              <div className="w-full border-t border-slate-900 pt-0.5 text-center">
+                                <span className="text-[9px] sm:text-[10px] font-bold text-slate-800 tracking-tight">
+                                  Authorized Signature
+                                </span>
                               </div>
-                              <div className="text-white font-bold text-xs">{member.packageData.packageName}</div>
-                            </div>
-
-                            <div className="w-10 h-10 bg-white rounded-lg p-1 shrink-0 shadow-xs">
-                              <QrCode className="w-full h-full text-slate-900" />
                             </div>
                           </div>
                         </div>
                       ) : (
                         /* CARD BACK */
-                        <div className="w-full aspect-[1.58/1] rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 text-white p-6 shadow-2xl border-2 border-slate-700 relative overflow-hidden flex flex-col justify-between">
+                        <div
+                          className="w-full bg-gradient-to-br from-[#0c2d48] via-[#103b5f] to-[#0a233a] rounded-3xl shadow-2xl border-2 border-sky-400/40 relative overflow-hidden text-white flex flex-col justify-between p-5 select-none print:shadow-none print:border-slate-400 print:m-auto"
+                          style={{ minHeight: "590px" }}
+                        >
                           {/* Magnetic Strip Representation */}
-                          <div className="-mx-6 -mt-1 h-10 bg-slate-950 border-y border-slate-800 flex items-center px-6">
-                            <span className="text-[9px] font-mono tracking-widest text-slate-500">
+                          <div className="-mx-5 -mt-5 h-10 bg-slate-950 border-b border-sky-500/30 flex items-center px-4">
+                            <span className="text-[8px] font-mono tracking-widest text-sky-300/80">
                               BIDDYASETU ALUMNI SECURITY STRIP · SECURE ENCRYPTED VERIFICATION
                             </span>
                           </div>
 
-                          {/* Terms & Instructions */}
-                          <div className="text-[10px] text-slate-300 space-y-1.5 leading-relaxed my-2">
-                            <p>
-                              • This card certifies that the bearer is an official registered alumnus of <strong>Adarsha High School, Kaitola</strong>.
-                            </p>
-                            <p>
-                              • Holds voting privileges in Executive Committee elections & General Assemblies.
-                            </p>
-                            <p>
-                              • Non-transferable. If found, please return to: <em>Kaitola, Brahmanbaria, Bangladesh</em>.
-                            </p>
+                          {/* Back Header */}
+                          <div className="flex items-center gap-3 mt-3 pb-3 border-b border-white/15">
+                            <div className="w-10 h-10 bg-white rounded-full p-0.5 flex items-center justify-center shrink-0">
+                              <Image src="/logo.png" alt="Logo" width={36} height={36} className="object-contain" />
+                            </div>
+                            <div>
+                              <div className="text-base font-black text-white leading-none">BIDDYASETU</div>
+                              <div className="text-[10px] text-sky-200 font-semibold mt-0.5">Alumni Association · Adarsha High School, Kaitola</div>
+                              <div className="text-[9px] text-sky-300">Bera, Pabna, Bangladesh</div>
+                            </div>
                           </div>
 
-                          {/* Signatures & Support Bar */}
-                          <div className="border-t border-slate-700/80 pt-2.5 flex items-center justify-between text-[10px]">
+                          {/* Terms & Instructions */}
+                          <div className="text-[10px] text-slate-200 space-y-2 leading-relaxed my-2">
+                            <div className="p-3 rounded-2xl bg-white/5 border border-white/10 space-y-1.5">
+                              <p className="font-bold text-yellow-300 text-[11px]">Cardholder Privileges & Terms:</p>
+                              <p>• This identification card certifies that the bearer is an official registered alumnus of Adarsha High School, Kaitola.</p>
+                              <p>• Grants voting privileges in biennial Executive Committee elections and General Assembly resolutions.</p>
+                              <p>• Priority entry pass for all annual reunions, scholarship award ceremonies, and sports galas.</p>
+                              <p>• Strictly non-transferable. If found, please return to: <em>Adarsha High School, Kaitola, Bera, Pabna</em>.</p>
+                            </div>
+                          </div>
+
+                          {/* QR Verification Badge */}
+                          <div className="bg-white/10 border border-white/20 rounded-2xl p-3 flex items-center justify-between gap-3">
+                            <div className="space-y-0.5">
+                              <div className="text-[9px] uppercase tracking-wider text-sky-300 font-bold">DIGITAL VERIFICATION</div>
+                              <div className="font-mono text-xs font-bold text-white">{member.memberId}</div>
+                              <div className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
+                                <CheckCircle2 className="w-3 h-3" /> Validated Member
+                              </div>
+                            </div>
+                            <div className="w-14 h-14 bg-white rounded-xl p-1 flex items-center justify-center shrink-0 shadow-md">
+                              <QrCode className="w-full h-full text-slate-900" />
+                            </div>
+                          </div>
+
+                          {/* Signatures & Hotline Footer */}
+                          <div className="border-t border-white/15 pt-3 flex items-end justify-between text-[10px]">
                             <div>
-                              <div className="font-serif italic text-sky-400 text-xs">Md. Rafiqul Islam</div>
-                              <div className="text-[8px] uppercase tracking-wider text-slate-400">
+                              <div className="font-serif italic text-yellow-300 text-xs">Md. Rafiqul Islam</div>
+                              <div className="text-[8px] uppercase tracking-wider text-slate-300">
                                 President Signature
                               </div>
                             </div>
 
-                            <div className="text-right font-mono text-[9px] text-slate-400">
-                              <div>Hotline: +880 1700-000000</div>
+                            <div className="text-right font-mono text-[9px] text-sky-200">
+                              <div>Hotline: +880 1711-015094</div>
                               <div>contact@biddyasetu.org</div>
+                              <div>www.biddyasetu.org</div>
                             </div>
                           </div>
                         </div>
@@ -1511,8 +1794,8 @@ export default function MemberDashboardPage() {
                             <td className="py-3.5 text-center">
                               <span
                                 className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${txn.status === "Verified"
-                                    ? "bg-emerald-100 text-emerald-800"
-                                    : "bg-amber-100 text-amber-800"
+                                  ? "bg-emerald-100 text-emerald-800"
+                                  : "bg-amber-100 text-amber-800"
                                   }`}
                               >
                                 {txn.status}
@@ -1800,8 +2083,8 @@ export default function MemberDashboardPage() {
                           type="button"
                           onClick={() => setPaymentAmount(amt)}
                           className={`py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${paymentAmount === amt
-                              ? "bg-sky-600 text-white border-sky-600"
-                              : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                            ? "bg-sky-600 text-white border-sky-600"
+                            : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                             }`}
                         >
                           ৳{amt}
@@ -1829,8 +2112,8 @@ export default function MemberDashboardPage() {
                           type="button"
                           onClick={() => setPaymentMethod(m)}
                           className={`py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${paymentMethod === m
-                              ? "bg-sky-50 text-sky-700 border-sky-500"
-                              : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                            ? "bg-sky-50 text-sky-700 border-sky-500"
+                            : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
                             }`}
                         >
                           {m}
