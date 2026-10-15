@@ -41,6 +41,8 @@ const totalSteps = 2; // Password step removed — now only 2 steps
 
 const bloodGroups = ["A+", "A−", "B+", "B−", "AB+", "AB−", "O+", "O−"];
 const genders = ["Male", "Female"];
+const maritalStatuses = ["Single", "Married", "Divorced", "Widowed"];
+const religions = ["Islam", "Hinduism", "Buddhism", "Christianity", "Other"];
 const countries = [
   "Bangladesh",
   "India",
@@ -120,6 +122,12 @@ export default function MembershipPage() {
     batch: "",
     profession: "",
     organization: "",
+    fatherName: "",
+    motherName: "",
+    spouseName: "",
+    nidNumber: "",
+    maritalStatus: "",
+    religion: "",
   });
 
   const [currentAddress, setCurrentAddress] = useState({
@@ -255,6 +263,12 @@ export default function MembershipPage() {
         batch: formData.batch,
         profession: formData.profession,
         organization: formData.organization,
+        fatherName: formData.fatherName,
+        motherName: formData.motherName,
+        spouseName: formData.spouseName,
+        nidNumber: formData.nidNumber,
+        maritalStatus: formData.maritalStatus,
+        religion: formData.religion,
         membership: selectedTier,
         membershipTier: selectedTier,
         currentAddress,
@@ -902,6 +916,89 @@ export default function MembershipPage() {
                             ))}
                           </select>
                         </FormGroup>
+
+                        {/* Family & Identification Details */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormGroup label="Father's Name" icon={User}>
+                            <input
+                              type="text"
+                              name="fatherName"
+                              value={formData.fatherName}
+                              onChange={handleInputChange}
+                              placeholder="e.g. Late Abdul Karim"
+                              className="w-full px-4 py-3 pl-10 rounded-xl border-2 border-[var(--border)] bg-white text-sm text-[var(--text)] outline-none transition-all duration-200 focus:border-[var(--primary)] focus:shadow-[0_0_0_4px_rgba(6,163,236,0.1)] hover:border-[var(--primary)]/50"
+                            />
+                          </FormGroup>
+
+                          <FormGroup label="Mother's Name" icon={User}>
+                            <input
+                              type="text"
+                              name="motherName"
+                              value={formData.motherName}
+                              onChange={handleInputChange}
+                              placeholder="e.g. Rahima Begum"
+                              className="w-full px-4 py-3 pl-10 rounded-xl border-2 border-[var(--border)] bg-white text-sm text-[var(--text)] outline-none transition-all duration-200 focus:border-[var(--primary)] focus:shadow-[0_0_0_4px_rgba(6,163,236,0.1)] hover:border-[var(--primary)]/50"
+                            />
+                          </FormGroup>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormGroup label="Marital Status" icon={Users}>
+                            <select
+                              name="maritalStatus"
+                              value={formData.maritalStatus}
+                              onChange={handleInputChange}
+                              className="w-full px-4 py-3 pl-10 rounded-xl border-2 border-[var(--border)] bg-white text-sm text-[var(--text)] outline-none transition-all duration-200 focus:border-[var(--primary)] focus:shadow-[0_0_0_4px_rgba(6,163,236,0.1)] appearance-none hover:border-[var(--primary)]/50"
+                            >
+                              <option value="">Select marital status...</option>
+                              {maritalStatuses.map((ms) => (
+                                <option key={ms} value={ms}>
+                                  {ms}
+                                </option>
+                              ))}
+                            </select>
+                          </FormGroup>
+
+                          <FormGroup label="Spouse's Name" icon={Heart} hint="If married (optional)">
+                            <input
+                              type="text"
+                              name="spouseName"
+                              value={formData.spouseName}
+                              onChange={handleInputChange}
+                              placeholder="e.g. Nasreen Akter"
+                              className="w-full px-4 py-3 pl-10 rounded-xl border-2 border-[var(--border)] bg-white text-sm text-[var(--text)] outline-none transition-all duration-200 focus:border-[var(--primary)] focus:shadow-[0_0_0_4px_rgba(6,163,236,0.1)] hover:border-[var(--primary)]/50"
+                            />
+                          </FormGroup>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormGroup label="National ID (NID) Number" icon={CreditCard} hint="Smart NID or 10/13/17 digit NID">
+                            <input
+                              type="text"
+                              name="nidNumber"
+                              value={formData.nidNumber}
+                              onChange={handleInputChange}
+                              placeholder="e.g. 19901234567890123"
+                              className="w-full px-4 py-3 pl-10 rounded-xl border-2 border-[var(--border)] bg-white text-sm text-[var(--text)] outline-none transition-all duration-200 focus:border-[var(--primary)] focus:shadow-[0_0_0_4px_rgba(6,163,236,0.1)] hover:border-[var(--primary)]/50 font-mono"
+                            />
+                          </FormGroup>
+
+                          <FormGroup label="Religion" icon={Sparkles}>
+                            <select
+                              name="religion"
+                              value={formData.religion}
+                              onChange={handleInputChange}
+                              className="w-full px-4 py-3 pl-10 rounded-xl border-2 border-[var(--border)] bg-white text-sm text-[var(--text)] outline-none transition-all duration-200 focus:border-[var(--primary)] focus:shadow-[0_0_0_4px_rgba(6,163,236,0.1)] appearance-none hover:border-[var(--primary)]/50"
+                            >
+                              <option value="">Select religion...</option>
+                              {religions.map((rel) => (
+                                <option key={rel} value={rel}>
+                                  {rel}
+                                </option>
+                              ))}
+                            </select>
+                          </FormGroup>
+                        </div>
 
                         <FormGroup
                           label="Profile Photo"

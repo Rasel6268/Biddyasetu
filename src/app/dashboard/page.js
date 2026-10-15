@@ -155,6 +155,12 @@ export default function MemberDashboardPage() {
           ? new Date(user.dateOfBirth).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" })
           : (user.dob || "31/12/1980"),
         nid: user.nid || user.nationalId || user.nidNumber || "671583518263",
+        nidNumber: user.nidNumber || user.nid || user.nationalId || "",
+        fatherName: user.fatherName || "",
+        motherName: user.motherName || "",
+        spouseName: user.spouseName || "",
+        maritalStatus: user.maritalStatus || "",
+        religion: user.religion || "",
         gender: user.gender
           ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1)
           : "Male",
@@ -219,7 +225,13 @@ export default function MemberDashboardPage() {
         bloodGroup: editForm.bloodGroup,
         gender: editForm.gender?.toLowerCase(),
         dateOfBirth: editForm.dob,
-        nid: editForm.nid,
+        nid: editForm.nidNumber || editForm.nid,
+        nidNumber: editForm.nidNumber || editForm.nid,
+        fatherName: editForm.fatherName,
+        motherName: editForm.motherName,
+        spouseName: editForm.spouseName,
+        maritalStatus: editForm.maritalStatus,
+        religion: editForm.religion,
         bio: editForm.bio,
         village: editForm.village,
         postOffice: editForm.postOffice,
@@ -1070,6 +1082,118 @@ export default function MemberDashboardPage() {
                           onChange={(e) => setEditForm({ ...editForm, bloodGroup: e.target.value })}
                           className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium disabled:bg-slate-50 disabled:text-slate-700 focus:outline-none focus:border-sky-500"
                         />
+                      </div>
+                    </div>
+
+                    {/* Family & Identification Sub-block */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">
+                          Father&apos;s Name
+                        </label>
+                        <input
+                          type="text"
+                          disabled={!isEditingProfile}
+                          value={editForm.fatherName || ""}
+                          onChange={(e) => setEditForm({ ...editForm, fatherName: e.target.value })}
+                          placeholder="Father's full name"
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium disabled:bg-slate-50 disabled:text-slate-700 focus:outline-none focus:border-sky-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">
+                          Mother&apos;s Name
+                        </label>
+                        <input
+                          type="text"
+                          disabled={!isEditingProfile}
+                          value={editForm.motherName || ""}
+                          onChange={(e) => setEditForm({ ...editForm, motherName: e.target.value })}
+                          placeholder="Mother's full name"
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium disabled:bg-slate-50 disabled:text-slate-700 focus:outline-none focus:border-sky-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">
+                          Marital Status
+                        </label>
+                        {isEditingProfile ? (
+                          <select
+                            value={editForm.maritalStatus || ""}
+                            onChange={(e) => setEditForm({ ...editForm, maritalStatus: e.target.value })}
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium bg-white focus:outline-none focus:border-sky-500"
+                          >
+                            <option value="">Select status...</option>
+                            <option value="Single">Single</option>
+                            <option value="Married">Married</option>
+                            <option value="Divorced">Divorced</option>
+                            <option value="Widowed">Widowed</option>
+                          </select>
+                        ) : (
+                          <input
+                            type="text"
+                            disabled
+                            value={editForm.maritalStatus || "Not specified"}
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium bg-slate-50 text-slate-700"
+                          />
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">
+                          Spouse&apos;s Name
+                        </label>
+                        <input
+                          type="text"
+                          disabled={!isEditingProfile}
+                          value={editForm.spouseName || ""}
+                          onChange={(e) => setEditForm({ ...editForm, spouseName: e.target.value })}
+                          placeholder="Spouse name (if married)"
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium disabled:bg-slate-50 disabled:text-slate-700 focus:outline-none focus:border-sky-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">
+                          National ID (NID)
+                        </label>
+                        <input
+                          type="text"
+                          disabled={!isEditingProfile}
+                          value={editForm.nidNumber || editForm.nid || ""}
+                          onChange={(e) => setEditForm({ ...editForm, nidNumber: e.target.value, nid: e.target.value })}
+                          placeholder="NID card number"
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-mono font-medium disabled:bg-slate-50 disabled:text-slate-700 focus:outline-none focus:border-sky-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">
+                          Religion
+                        </label>
+                        {isEditingProfile ? (
+                          <select
+                            value={editForm.religion || ""}
+                            onChange={(e) => setEditForm({ ...editForm, religion: e.target.value })}
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium bg-white focus:outline-none focus:border-sky-500"
+                          >
+                            <option value="">Select religion...</option>
+                            <option value="Islam">Islam</option>
+                            <option value="Hinduism">Hinduism</option>
+                            <option value="Buddhism">Buddhism</option>
+                            <option value="Christianity">Christianity</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        ) : (
+                          <input
+                            type="text"
+                            disabled
+                            value={editForm.religion || "Not specified"}
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium bg-slate-50 text-slate-700"
+                          />
+                        )}
                       </div>
                     </div>
                   </div>

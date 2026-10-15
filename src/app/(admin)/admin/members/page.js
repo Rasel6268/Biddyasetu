@@ -103,6 +103,12 @@ export default function AdminMembersPage() {
       "Batch",
       "Profession",
       "Organization",
+      "Father Name",
+      "Mother Name",
+      "Spouse Name",
+      "NID Number",
+      "Marital Status",
+      "Religion",
       "Blood Group",
       "Country",
       "City",
@@ -126,6 +132,12 @@ export default function AdminMembersPage() {
       escapeCsv(m.batch || ""),
       escapeCsv(m.profession || ""),
       escapeCsv(m.organization || m.company || ""),
+      escapeCsv(m.fatherName || ""),
+      escapeCsv(m.motherName || ""),
+      escapeCsv(m.spouseName || ""),
+      escapeCsv(m.nidNumber || m.nid || ""),
+      escapeCsv(m.maritalStatus || ""),
+      escapeCsv(m.religion || ""),
       escapeCsv(m.bloodGroup || ""),
       escapeCsv(m.currentAddress?.country || m.country || "Bangladesh"),
       escapeCsv(m.currentAddress?.city || m.city || ""),
@@ -625,6 +637,39 @@ export default function AdminMembersPage() {
                   <div className="flex items-center gap-2 text-slate-700">
                     <MapPin className="w-3.5 h-3.5 text-sky-500 shrink-0" />
                     <span>{selectedMember.currentAddress?.country || selectedMember.country || "Bangladesh"}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Family & Identity Info */}
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-2.5">
+                <div className="font-extrabold text-[11px] text-slate-400 uppercase tracking-wider mb-2">
+                  Family & Identification Details
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <span className="text-slate-400 block text-[10px] uppercase font-bold">Father&apos;s Name</span>
+                    <span className="font-bold text-slate-800">{selectedMember.fatherName || "Not provided"}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[10px] uppercase font-bold">Mother&apos;s Name</span>
+                    <span className="font-bold text-slate-800">{selectedMember.motherName || "Not provided"}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[10px] uppercase font-bold">Marital Status</span>
+                    <span className="font-bold text-slate-800">{selectedMember.maritalStatus || "Not specified"}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[10px] uppercase font-bold">Spouse&apos;s Name</span>
+                    <span className="font-bold text-slate-800">{selectedMember.spouseName || "N/A"}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[10px] uppercase font-bold">National ID (NID)</span>
+                    <span className="font-mono font-bold text-slate-800">{selectedMember.nidNumber || selectedMember.nid || "Not provided"}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[10px] uppercase font-bold">Religion</span>
+                    <span className="font-bold text-slate-800">{selectedMember.religion || "Not specified"}</span>
                   </div>
                 </div>
               </div>

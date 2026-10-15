@@ -16,6 +16,10 @@ import {
   CheckCircle,
   ExternalLink,
   MessageSquare,
+  User,
+  Heart,
+  CreditCard,
+  Sparkles,
 } from "lucide-react";
 import { FaLinkedin, FaFacebook } from "react-icons/fa";
 
@@ -153,6 +157,53 @@ export default function MemberModal({ member, onClose }) {
               </div>
             </div>
           </div>
+
+          {/* Personal & Family Details */}
+          {(member.fatherName || member.motherName || member.spouseName || member.nidNumber || member.maritalStatus || member.religion) && (
+            <div className="mb-6 p-4 rounded-2xl bg-sky-50/40 border border-sky-100">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-sky-800 mb-3 flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-sky-600" /> Personal & Family Information
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                {member.fatherName && (
+                  <div className="p-2.5 rounded-xl bg-white border border-slate-100">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Father&apos;s Name</span>
+                    <span className="font-bold text-slate-800 text-xs sm:text-sm">{member.fatherName}</span>
+                  </div>
+                )}
+                {member.motherName && (
+                  <div className="p-2.5 rounded-xl bg-white border border-slate-100">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Mother&apos;s Name</span>
+                    <span className="font-bold text-slate-800 text-xs sm:text-sm">{member.motherName}</span>
+                  </div>
+                )}
+                {member.maritalStatus && (
+                  <div className="p-2.5 rounded-xl bg-white border border-slate-100">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Marital Status</span>
+                    <span className="font-bold text-slate-800 text-xs sm:text-sm">{member.maritalStatus}</span>
+                  </div>
+                )}
+                {member.spouseName && (
+                  <div className="p-2.5 rounded-xl bg-white border border-slate-100">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Spouse&apos;s Name</span>
+                    <span className="font-bold text-slate-800 text-xs sm:text-sm">{member.spouseName}</span>
+                  </div>
+                )}
+                {(member.nidNumber || member.nid) && (
+                  <div className="p-2.5 rounded-xl bg-white border border-slate-100">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">National ID (NID)</span>
+                    <span className="font-mono font-bold text-slate-800 text-xs sm:text-sm">{member.nidNumber || member.nid}</span>
+                  </div>
+                )}
+                {member.religion && (
+                  <div className="p-2.5 rounded-xl bg-white border border-slate-100">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Religion</span>
+                    <span className="font-bold text-slate-800 text-xs sm:text-sm">{member.religion}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Biography */}
           <div className="mb-6">

@@ -384,6 +384,12 @@ export default function MembersPage() {
         phone: m.phone,
         email: m.email,
         bio: m.bio || "",
+        fatherName: m.fatherName || "",
+        motherName: m.motherName || "",
+        spouseName: m.spouseName || "",
+        nidNumber: m.nidNumber || m.nid || "",
+        maritalStatus: m.maritalStatus || "",
+        religion: m.religion || "",
         joinDate: m.createdAt ? new Date(m.createdAt).toLocaleDateString() : "2024",
       };
     });
