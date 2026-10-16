@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { alumniMembers, batches } from "@/lib/data/demo";
 import {
   Search,
   MapPin,
@@ -31,292 +30,152 @@ import {
   Star,
   Trophy,
 } from "lucide-react";
-import { FaLinkedin, FaFacebook } from "react-icons/fa";
-import { LiaLinkedin } from "react-icons/lia";
+
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
 import MemberModal from "@/components/members/MemberModal";
 import { useMembers } from "@/hooks/useQueries";
 
-const professions = [...new Set(alumniMembers.map((m) => m.profession))];
-const countries = [...new Set(alumniMembers.map((m) => m.country))];
-const membershipTypes = ["Life Member", "General Member"];
+const membershipTypes = ["Life Member", "General Member", "Donor Member"];
 
-function Avatar({ initials, color, size = 64 }) {
-  return (
-    <div
-      className="rounded-full flex items-center justify-center text-white font-extrabold shrink-0 border-2 border-white shadow-md"
-      style={{
-        width: size,
-        height: size,
-        background: `linear-gradient(135deg, ${color || "#06A3EC"}cc, ${color || "#06A3EC"})`,
-        fontSize: size * 0.32,
-      }}
-    >
-      {initials}
-    </div>
-  );
-}
-
-// Premium Member Card Component (Horizontal Layout)
-const PremiumMemberCard = ({ member, index, isManaging = false, expanded = false, onToggle }) => {
-  const statusColor = {
-    "Active": "text-emerald-700 bg-emerald-50 border-emerald-200",
-    "Inactive": "text-slate-500 bg-slate-50 border-slate-200",
-    "Expired": "text-rose-700 bg-rose-50 border-rose-200",
-  }[member.status || "Active"] || "text-emerald-700 bg-emerald-50 border-emerald-200";
-
+// Premium Member Card Component (Standardized Fixed Dimensions h-[230px] w-full)
+const PremiumMemberCard = ({ member, index, isManaging = false, onSelect }) => {
   const membershipBadgeColor = {
-    "Life Member": "bg-amber-100 text-amber-800 border-amber-300",
-    "General Member": "bg-blue-100 text-blue-800 border-blue-300",
-    "Donor Member": "bg-purple-100 text-purple-800 border-purple-300",
-  }[member.membership] || "bg-blue-100 text-blue-800 border-blue-300";
+    "Life Member": "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/40 dark:text-amber-300 dark:border-amber-700",
+    "General Member": "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-700",
+    "Donor Member": "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-700",
+  }[member.membership] || "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-700";
 
   return (
-    <ScrollAnimation key={member.id} animation="fade-in-up" delay={(index % 12) * 40}>
+    <ScrollAnimation key={member.id} animation="fade-in-up" delay={(index % 12) * 40} className="w-full">
       <div
-        className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border ${isManaging
-          ? "border-amber-300 dark:border-amber-700"
-          : "border-gray-100 dark:border-gray-700"
+        onClick={onSelect}
+        className={`group relative bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border cursor-pointer h-[230px] w-full flex flex-col ${isManaging
+          ? "border-amber-300/80 dark:border-amber-700/80 ring-1 ring-amber-400/20"
+          : "border-slate-200/80 dark:border-gray-700 hover:border-sky-300 dark:hover:border-sky-500"
           }`}
       >
         {/* Top accent bar */}
         <div
-          className={`absolute top-0 left-0 right-0 h-1 ${isManaging
+          className={`absolute top-0 left-0 right-0 h-1 z-10 ${isManaging
             ? "bg-gradient-to-r from-amber-400 to-yellow-500"
-            : "bg-gradient-to-r from-emerald-500 to-teal-400"
+            : "bg-gradient-to-r from-sky-500 to-teal-400"
             }`}
         />
 
         {/* Main horizontal row: LEFT image | RIGHT info */}
-        <div className="flex flex-row items-stretch">
-          {/* LEFT: Member Image */}
-          <div className="relative shrink-0 w-32 sm:w-40 overflow-hidden bg-slate-100">
+        <div className="flex flex-row items-stretch h-full w-full">
+          {/* LEFT: Fixed Aspect Ratio Profile Photo (strict fixed width w-28 sm:w-36 and h-full with object-cover) */}
+          <div className="relative shrink-0 w-28 sm:w-36 h-full overflow-hidden bg-slate-100 dark:bg-slate-700">
             {member.profileImage || member.image || member.avatar ? (
               <img
                 src={member.profileImage || member.image || member.avatar}
                 alt={member.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
             ) : (
-              <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-sky-200 to-sky-400 flex items-center justify-center text-white font-black text-4xl">
-                {member.initials}
+              <div className="w-full h-full bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center text-white font-black text-2xl sm:text-3xl select-none group-hover:scale-105 transition-transform duration-500">
+                {member.initials || (member.name || "A").slice(0, 2).toUpperCase()}
               </div>
             )}
+
             {member.verified && (
-              <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow-md">
-                <BadgeCheck className="w-5 h-5 text-sky-500 fill-sky-500 stroke-white" />
+              <div
+                className="absolute bottom-2 right-2 bg-white dark:bg-slate-900 rounded-full p-0.5 shadow-md z-10"
+                title="Verified Member"
+              >
+                <BadgeCheck className="w-4 h-4 text-sky-500 fill-sky-500 stroke-white" />
               </div>
             )}
+
             {isManaging && (
-              <div className="absolute top-2 left-2">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-xs font-semibold rounded-full">
-                  <Star className="w-3 h-3" />
-                  Managing
+              <div className="absolute top-2 left-2 z-10">
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded-full shadow-sm">
+                  <Star className="w-2.5 h-2.5 fill-white" />
+                  EC
                 </span>
               </div>
             )}
           </div>
 
-          {/* RIGHT: Member Information */}
-          <div className="flex-1 p-5 pt-6 flex flex-col justify-between min-w-0">
-            <div>
-              <div className="flex items-center gap-2 flex-wrap mb-1">
-                <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight truncate">
+          {/* RIGHT: Bounded Information Rows */}
+          <div className="flex-1 p-3.5 sm:p-4 flex flex-col justify-between min-w-0 h-full">
+            {/* Header info */}
+            <div className="min-w-0">
+              {/* Row 1: Name, Badge, Blood Group */}
+              <div className="flex items-center gap-1.5 min-w-0 mb-1">
+                <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white truncate flex-1 leading-snug group-hover:text-sky-600 transition-colors">
                   {member.name}
                 </h3>
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${membershipBadgeColor}`}>
+                <span className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold border ${membershipBadgeColor}`}>
                   {member.membership}
                 </span>
                 {member.bloodGroup && (
-                  <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200">
-                    <Droplets className="w-3 h-3 text-rose-500" />
+                  <span className="shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800">
+                    <Droplets className="w-2.5 h-2.5 text-rose-500" />
                     {member.bloodGroup}
                   </span>
                 )}
               </div>
 
+              {/* Row 2: Profession */}
               <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 truncate mb-1">
-                {member.profession}
+                {member.profession || "Alumni Member"}
               </p>
 
-              <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">
-                ID: {member.id || `AHS-${String(index + 1).padStart(4, "0")}`} • Batch {member.batch}
+              {/* Row 3: ID & Batch */}
+              <p className="text-[11px] text-gray-400 dark:text-gray-500 truncate mb-2">
+                ID: {member.id || `AHS-${String(index + 1).padStart(4, "0")}`} • Batch {member.batch || "N/A"}
               </p>
 
-              {/* Contact info */}
-              <div className="space-y-1.5">
-                {member.email && (
-                  <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                    <Mail className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
-                    <span className="truncate">{member.email}</span>
-                  </div>
-                )}
-                {member.phone && (
-                  <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                    <Phone className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
-                    <span>{member.phone}</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                  <MapPin className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
-                  <span className="truncate">{member.location}, {member.country}</span>
+              {/* 3 Uniform Info Slots (Location, Email, Phone/Organization) */}
+              <div className="space-y-1 text-xs text-gray-500 dark:text-gray-400">
+                <div className="flex items-center gap-2 truncate">
+                  <MapPin className="w-3.5 h-3.5 shrink-0 text-slate-400 group-hover:text-sky-500 transition-colors" />
+                  <span className="truncate">
+                    {[member.location, member.country].filter(Boolean).join(", ") || "Location not specified"}
+                  </span>
                 </div>
-                {member.company && (
-                  <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                    <Building2 className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
-                    <span className="truncate">{member.company}</span>
-                  </div>
-                )}
+
+                <div className="flex items-center gap-2 truncate">
+                  <Mail className="w-3.5 h-3.5 shrink-0 text-slate-400 group-hover:text-sky-500 transition-colors" />
+                  <span className="truncate">{member.email || "Email not public"}</span>
+                </div>
+
+                <div className="flex items-center gap-2 truncate">
+                  {member.company ? (
+                    <>
+                      <Building2 className="w-3.5 h-3.5 shrink-0 text-slate-400 group-hover:text-sky-500 transition-colors" />
+                      <span className="truncate">{member.company}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Phone className="w-3.5 h-3.5 shrink-0 text-slate-400 group-hover:text-sky-500 transition-colors" />
+                      <span className="truncate">{member.phone || "Phone not public"}</span>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Expand/Collapse Button */}
-            <button
-              onClick={onToggle}
-              className="mt-4 self-start flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-full transition-all duration-200"
-            >
-              {expanded ? (
-                <ChevronUp className="w-3.5 h-3.5" />
-              ) : (
-                <ChevronDown className="w-3.5 h-3.5" />
-              )}
-              {expanded ? "Show less" : "View details"}
-            </button>
+            {/* Bottom Action Row: View Profile button */}
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between">
+              <span className="text-[11px] font-medium text-slate-400">
+                {member.joinDate ? `Joined ${member.joinDate}` : "Alumni Member"}
+              </span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelect();
+                }}
+                className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-900/30 hover:bg-sky-100 dark:hover:bg-sky-900/50 rounded-lg transition-colors cursor-pointer"
+              >
+                View Profile
+                <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+              </button>
+            </div>
           </div>
         </div>
-
-        {/* Expanded Details */}
-        {expanded && (
-          <div className="px-5 pb-5 pt-4 border-t border-gray-100 dark:border-gray-700 space-y-3 animate-slide-down">
-            {member.bio && (
-              <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-                {member.bio}
-              </p>
-            )}
-
-            {member.joinDate && (
-              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                <Calendar className="w-3.5 h-3.5 text-emerald-500" />
-                <span>Member since {member.joinDate}</span>
-              </div>
-            )}
-
-            {member.expiryDate && (
-              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                <Clock className="w-3.5 h-3.5 text-emerald-500" />
-                <span>Expires: {member.expiryDate}</span>
-              </div>
-            )}
-
-            {member.interests && member.interests.length > 0 && (
-              <div>
-                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1.5">
-                  Interests
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {member.interests.map((interest, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs rounded-full font-medium"
-                    >
-                      {interest}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {member.contributions && member.contributions.length > 0 && (
-              <div>
-                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1.5">
-                  Contributions
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {member.contributions.map((contribution, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2.5 py-1 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-xs rounded-full font-medium"
-                    >
-                      {contribution}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {member.achievements && member.achievements.length > 0 && (
-              <div>
-                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1.5">
-                  Achievements
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {member.achievements.map((achievement, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2.5 py-1 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded-full font-medium flex items-center gap-1"
-                    >
-                      <Trophy className="w-3 h-3" />
-                      {achievement}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Social Links */}
-            {(member.social?.linkedin || member.social?.facebook || member.social?.website) && (
-              <div className="flex gap-3 pt-1">
-                {member.social?.linkedin && (
-                  <a
-                    href={member.social.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                  >
-                    <LiaLinkedin className="w-5 h-5" />
-                  </a>
-                )}
-                {member.social?.facebook && (
-                  <a
-                    href={member.social.facebook}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                  >
-                    <FaFacebook className="w-4 h-4" />
-                  </a>
-                )}
-                {member.social?.website && (
-                  <a
-                    href={member.social.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                  >
-                    <Globe className="w-4 h-4" />
-                  </a>
-                )}
-              </div>
-            )}
-
-            {/* QR & Verification Footer */}
-            <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5">
-                  <QrCode className="w-4 h-4 text-slate-400" />
-                  <span className="text-[10px] font-semibold text-slate-400">Verify</span>
-                </div>
-                <div className="h-4 w-px bg-slate-200"></div>
-                <span className="text-[10px] font-medium text-slate-400">
-                  {member.verified ? "✓ Verified Member" : "Member"}
-                </span>
-              </div>
-              <span className="text-[9px] font-medium text-slate-400/80">
-                Property of Adarsha High School
-              </span>
-            </div>
-          </div>
-        )}
       </div>
     </ScrollAnimation>
   );
@@ -333,14 +192,6 @@ export default function MembersPage() {
   const [viewMode, setViewMode] = useState("grid");
   const [showFilters, setShowFilters] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
-  const [expandedMembers, setExpandedMembers] = useState({});
-
-  const toggleExpand = (memberId) => {
-    setExpandedMembers(prev => ({
-      ...prev,
-      [memberId]: !prev[memberId]
-    }));
-  };
 
   const quickPills = [
     { id: "all", label: "All Members" },
@@ -352,13 +203,13 @@ export default function MembersPage() {
     { id: "doctors", label: "Medical & Health" },
   ];
 
-  const { data: dbMembers = [] } = useMembers();
+  const { data: dbMembers = [], isLoading } = useMembers();
 
   const allMembers = useMemo(() => {
-    if (!dbMembers || dbMembers.length === 0) return alumniMembers;
+    if (!Array.isArray(dbMembers) || dbMembers.length === 0) return [];
 
     // Format DB members to match directory structure
-    const formattedDbMembers = dbMembers.map((m) => {
+    return dbMembers.map((m) => {
       const tierName =
         m.packageData?.packageName ||
         (m.membership === "life_member"
@@ -369,20 +220,21 @@ export default function MembersPage() {
 
       return {
         id: m.membershipId || `AHS-${m._id?.slice(-4) || "0001"}`,
-        name: m.name,
-        nameBn: m.nameBn,
-        batch: m.batch ? String(m.batch) : "2015",
+        name: m.name || "Member",
+        nameBn: m.nameBn || "",
+        batch: m.batch ? String(m.batch) : "",
         profession: m.profession || "Alumni Member",
         company: m.organization || m.company || "",
-        location: m.currentAddress?.city || "Nakalia, Bera",
+        location: m.currentAddress?.city || m.permanentAddress?.city || "Bangladesh",
         country: m.currentAddress?.country || "Bangladesh",
         membership: tierName,
         bloodGroup: m.bloodGroup || null,
         profileImage: m.profileImage || null,
         initials: (m.name || "A").slice(0, 2).toUpperCase(),
         verified: (m.membershipStatus || m.status) === "active" || (m.membershipStatus || m.status) === "Verified",
-        phone: m.phone,
-        email: m.email,
+        isManaging: Boolean(m.isExecutive || m.isManaging || m.role === "admin"),
+        phone: m.phone || "",
+        email: m.email || "",
         bio: m.bio || "",
         fatherName: m.fatherName || "",
         motherName: m.motherName || "",
@@ -390,16 +242,23 @@ export default function MembersPage() {
         nidNumber: m.nidNumber || m.nid || "",
         maritalStatus: m.maritalStatus || "",
         religion: m.religion || "",
-        joinDate: m.createdAt ? new Date(m.createdAt).toLocaleDateString() : "2024",
+        joinDate: m.createdAt ? new Date(m.createdAt).toLocaleDateString() : "",
       };
     });
-
-    // Deduplicate against demo members by phone/ID/name
-    const existingPhones = new Set(formattedDbMembers.map((m) => m.phone).filter(Boolean));
-    const nonDuplicatedDemo = alumniMembers.filter((m) => !existingPhones.has(m.phone));
-
-    return [...formattedDbMembers, ...nonDuplicatedDemo];
   }, [dbMembers]);
+
+  // Dynamically derive filter options from real DB members
+  const batches = useMemo(() => {
+    return [...new Set(allMembers.map((m) => m.batch).filter(Boolean))].sort((a, b) => b.localeCompare(a));
+  }, [allMembers]);
+
+  const professions = useMemo(() => {
+    return [...new Set(allMembers.map((m) => m.profession).filter(Boolean))].sort();
+  }, [allMembers]);
+
+  const countries = useMemo(() => {
+    return [...new Set(allMembers.map((m) => m.country).filter(Boolean))].sort();
+  }, [allMembers]);
 
   const filtered = useMemo(() => {
     let list = allMembers.filter((m) => {
@@ -668,51 +527,61 @@ export default function MembersPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-6 text-sm text-slate-600 font-medium">
             <p>
-              Showing <strong className="text-slate-900 font-extrabold">{filtered.length}</strong> of {alumniMembers.length} alumni members
+              Showing <strong className="text-slate-900 font-extrabold">{filtered.length}</strong> of {allMembers.length} alumni members
             </p>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-slate-200 text-xs text-slate-500">
               <BadgeCheck className="w-3.5 h-3.5 text-sky-500" /> Click on any profile to connect
             </span>
           </div>
 
-          {filtered.length === 0 ? (
+          {isLoading ? (
+            <div className="p-20 rounded-3xl bg-white border border-slate-200 text-center flex flex-col items-center justify-center">
+              <div className="w-10 h-10 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mb-4" />
+              <h3 className="text-base font-bold text-slate-800 mb-1">Loading Alumni Directory...</h3>
+              <p className="text-xs text-slate-500">Fetching verified members from database</p>
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="p-16 rounded-3xl bg-white border-2 border-dashed border-slate-200 text-center text-slate-500">
               <Search className="w-12 h-12 mx-auto mb-4 opacity-30 text-slate-400" />
-              <h3 className="text-lg font-bold text-slate-800 mb-1">No alumni members found</h3>
-              <p className="text-sm text-slate-500 mb-4">Try adjusting your filters or search keywords.</p>
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="px-5 py-2.5 rounded-xl bg-sky-500 text-white font-bold text-sm shadow-md hover:bg-sky-600 transition-colors"
-              >
-                Reset All Filters
-              </button>
+              <h3 className="text-lg font-bold text-slate-800 mb-1">Not Found any members</h3>
+              <p className="text-sm text-slate-500 mb-4">
+                {allMembers.length === 0
+                  ? "No registered alumni members found in the database yet."
+                  : "Try adjusting your filters or search keywords."}
+              </p>
+              {hasFilters && (
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="px-5 py-2.5 rounded-xl bg-sky-500 text-white font-bold text-sm shadow-md hover:bg-sky-600 transition-colors"
+                >
+                  Reset All Filters
+                </button>
+              )}
             </div>
           ) : viewMode === "grid" ? (
-            // GRID VIEW - 4 columns on large screens
+            // GRID VIEW - Standardized card height & width (h-[230px] w-full)
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
               {filtered.map((member, index) => (
                 <PremiumMemberCard
                   key={member.id}
                   member={member}
                   index={index}
-                  isManaging={index < 3}
-                  expanded={expandedMembers[member.id] || false}
-                  onToggle={() => toggleExpand(member.id)}
+                  isManaging={member.isManaging}
+                  onSelect={() => setSelectedMember(member)}
                 />
               ))}
             </div>
           ) : (
-            // LIST VIEW - Full width cards
+            // LIST VIEW - Full width cards with standardized height (h-[230px] w-full)
             <div className="flex flex-col gap-4">
               {filtered.map((member, index) => (
                 <PremiumMemberCard
                   key={member.id}
                   member={member}
                   index={index}
-                  isManaging={index < 3}
-                  expanded={expandedMembers[member.id] || false}
-                  onToggle={() => toggleExpand(member.id)}
+                  isManaging={member.isManaging}
+                  onSelect={() => setSelectedMember(member)}
                 />
               ))}
             </div>

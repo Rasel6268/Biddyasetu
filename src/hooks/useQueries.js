@@ -326,3 +326,120 @@ export function useDeleteAnnouncement() {
   });
 }
 
+/**
+ * Hook to fetch active membership packages (Public)
+ */
+export function useMembershipPackages() {
+  return useQuery({
+    queryKey: ["membershipPackages"],
+    queryFn: async () => {
+      const response = await api.get("/membership-packages");
+      return response.data?.data ?? [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+/**
+ * Hook to fetch all membership packages for Admin
+ */
+export function useAdminMembershipPackages() {
+  return useQuery({
+    queryKey: ["adminMembershipPackages"],
+    queryFn: async () => {
+      const response = await api.get("/membership-packages/admin");
+      return response.data?.data ?? [];
+    },
+    staleTime: 30 * 1000,
+  });
+}
+
+/**
+ * Hook to create a membership package (Admin)
+ */
+export function useCreateMembershipPackage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (packageData) => {
+      const response = await api.post("/membership-packages", packageData);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      showSuccess(data?.message || "Package created successfully!");
+      queryClient.invalidateQueries({ queryKey: ["adminMembershipPackages"] });
+      queryClient.invalidateQueries({ queryKey: ["membershipPackages"] });
+    },
+    onError: (err) => {
+      showError(err);
+    },
+  });
+}
+
+/**
+ * Hook to update a membership package (Admin)
+ */
+export function useUpdateMembershipPackage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, packageData }) => {
+      const response = await api.put(`/membership-packages/${id}`, packageData);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      showSuccess(data?.message || "Package updated successfully!");
+      queryClient.invalidateQueries({ queryKey: ["adminMembershipPackages"] });
+      queryClient.invalidateQueries({ queryKey: ["membershipPackages"] });
+    },
+    onError: (err) => {
+      showError(err);
+    },
+  });
+}
+
+/**
+ * Hook to toggle package active status (Admin)
+ */
+export function useToggleMembershipPackage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id) => {
+      const response = await api.patch(`/membership-packages/${id}/toggle`);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      showSuccess(data?.message || "Package status updated successfully!");
+      queryClient.invalidateQueries({ queryKey: ["adminMembershipPackages"] });
+      queryClient.invalidateQueries({ queryKey: ["membershipPackages"] });
+    },
+    onError: (err) => {
+      showError(err);
+    },
+  });
+}
+
+/**
+ * Hook to delete a membership package (Admin)
+ */
+export function useDeleteMembershipPackage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id) => {
+      const response = await api.delete(`/membership-packages/${id}`);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      showSuccess(data?.message || "Package deleted successfully!");
+      queryClient.invalidateQueries({ queryKey: ["adminMembershipPackages"] });
+      queryClient.invalidateQueries({ queryKey: ["membershipPackages"] });
+    },
+    onError: (err) => {
+      showError(err);
+    },
+  });
+}
+
+

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { batches, membershipTypes } from "@/lib/data/demo";
 import { countryDialCodes } from "@/lib/data/countries";
@@ -36,6 +36,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { showSuccess, showError } from "@/utility/toast";
 import api from "@/utility/config";
+import { useMembershipPackages } from "@/hooks/useQueries";
 
 const totalSteps = 2; // Password step removed — now only 2 steps
 
@@ -112,6 +113,22 @@ export default function MembershipPage() {
   const activePhoneCountry =
     countryDialCodes.find((c) => c.code === phoneCountryCode) ||
     countryDialCodes[0];
+
+  const { data: dbPackages = [] } = useMembershipPackages();
+
+  const availableTiers = useMemo(() => {
+    if (dbPackages && dbPackages.length > 0) {
+      return dbPackages.map((p) => ({
+        name: p.name,
+        fee: `৳${Number(p.fee).toLocaleString()}`,
+        amount: Number(p.fee),
+        cycle: p.cycle,
+        description: p.description,
+        benefits: p.benefits,
+      }));
+    }
+    return membershipTypes;
+  }, [dbPackages]);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -287,6 +304,28 @@ export default function MembershipPage() {
   };
 
   const getPackageDetails = () => {
+    const matched = availableTiers.find((t) => t.name === selectedTier);
+    if (matched && matched.amount !== undefined) {
+      const isLifetime = matched.cycle === "One-time" || matched.cycle === "Lifetime";
+      return {
+        name: `${matched.name} Package`,
+        fee: matched.fee,
+        billing: matched.cycle ? `${matched.cycle} Validity` : "Annual",
+        renewalText: isLifetime
+          ? "Never expires · Permanent membership"
+          : "Renews periodically for alumni membership",
+        amount: matched.amount,
+        duration: matched.cycle || "1 Year",
+        perks: matched.benefits?.length
+          ? matched.benefits
+          : [
+              "Verified entry in alumni global directory",
+              "Official alumni reunion & sports tournament passes",
+              "Access to alumni job board and mentorship hub",
+            ],
+      };
+    }
+
     const tier = (selectedTier || "").toLowerCase();
     if (tier.includes("life")) {
       return {
@@ -1401,7 +1440,7 @@ export default function MembershipPage() {
                               className="w-full px-4 py-3 pl-10 rounded-xl border-2 border-[var(--border)] bg-white text-sm text-[var(--text)] outline-none transition-all duration-200 focus:border-[var(--primary)] focus:shadow-[0_0_0_4px_rgba(6,163,236,0.1)] appearance-none hover:border-[var(--primary)]/50"
                               required
                             >
-                              {membershipTypes.map((t) => (
+                              {availableTiers.map((t) => (
                                 <option key={t.name} value={t.name}>
                                   {t.name} — {t.fee}
                                 </option>

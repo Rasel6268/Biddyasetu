@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   CreditCard,
   Crown,
@@ -8,215 +8,34 @@ import {
   Users,
   CheckCircle2,
   X,
-  Clock,
   Plus,
   Edit3,
   Trash2,
   Search,
-  Filter,
   Download,
   Award,
-  TrendingUp,
   AlertCircle,
   Eye,
   Send,
-  BadgeCheck,
   ShieldCheck,
+  RefreshCw,
 } from "lucide-react";
-
-// ─── Membership Package Data ───
-const defaultPackages = [
-  {
-    id: "pkg-general",
-    name: "General Member",
-    namebn: "সাধারণ সদস্য",
-    fee: 1000,
-    cycle: "Annual",
-    description:
-      "Standard annual membership for all verified alumni of Adarsha High School, Kaitola. Includes access to alumni directory, event participation, and voting rights in AGM.",
-    benefits: [
-      "Alumni Directory Access",
-      "Event Participation",
-      "AGM Voting Rights",
-      "Community Forum Access",
-      "Digital Membership Card",
-    ],
-    color: "sky",
-    icon: "users",
-    isActive: true,
-  },
-  {
-    id: "pkg-life",
-    name: "Life Member",
-    namebn: "আজীবন সদস্য",
-    fee: 20000,
-    cycle: "One-time",
-    description:
-      "Pay ৳20,000 (equivalent to 20 years of annual fees) once and become a permanent life member. Receive an official Life Membership Certificate and badge.",
-    benefits: [
-      "All General Member Benefits",
-      "Life Membership Certificate",
-      "Permanent Member Status",
-      "Priority Event Seating",
-      "Executive Meeting Access",
-      "Special Recognition on Website",
-    ],
-    color: "amber",
-    icon: "crown",
-    isActive: true,
-  },
-  {
-    id: "pkg-donor",
-    name: "Patron / Donor Member",
-    namebn: "পৃষ্ঠপোষক সদস্য",
-    fee: 50000,
-    cycle: "One-time",
-    description:
-      "For distinguished alumni who wish to contribute significantly to Biddyasetu's welfare fund. Includes all Life Member privileges plus exclusive Patron honors.",
-    benefits: [
-      "All Life Member Benefits",
-      "Patron Honor Roll Recognition",
-      "School Naming Opportunity (Labs, Library)",
-      "Annual Report Acknowledgment",
-      "Exclusive Patron Events & Dinners",
-      "Advisory Board Eligibility",
-    ],
-    color: "purple",
-    icon: "heart",
-    isActive: true,
-  },
-];
-
-// ─── Mock Member Fee Data ───
-const memberFeeData = [
-  {
-    id: "BDS-LM-0102",
-    name: "Md. Rafiqul Islam",
-    batch: "1998",
-    phone: "+880 1711-223344",
-    package: "Life Member",
-    totalPaid: 20000,
-    lastPayment: "2025-12-15",
-    status: "Paid",
-    certificate: true,
-    paymentHistory: [
-      { date: "2025-12-15", amount: 20000, method: "bKash", trxId: "BK77109283" },
-    ],
-  },
-  {
-    id: "BDS-GM-0341",
-    name: "Engr. Tanvir Ahmed",
-    batch: "2006",
-    phone: "+880 1812-556677",
-    package: "General Member",
-    totalPaid: 3000,
-    lastPayment: "2026-01-10",
-    status: "Paid",
-    validUntil: "2027-01-10",
-    certificate: false,
-    paymentHistory: [
-      { date: "2026-01-10", amount: 1000, method: "Nagad", trxId: "NG42198301" },
-      { date: "2025-01-08", amount: 1000, method: "bKash", trxId: "BK55301920" },
-      { date: "2024-02-14", amount: 1000, method: "bKash", trxId: "BK33019284" },
-    ],
-  },
-  {
-    id: "BDS-GM-0512",
-    name: "Farhana Akter",
-    batch: "2010",
-    phone: "+880 1600-998877",
-    package: "General Member",
-    totalPaid: 2000,
-    lastPayment: "2025-06-20",
-    status: "Unpaid",
-    validUntil: "2026-06-20",
-    certificate: false,
-    dueAmount: 1000,
-    paymentHistory: [
-      { date: "2025-06-20", amount: 1000, method: "Rocket", trxId: "RK91204821" },
-      { date: "2024-06-18", amount: 1000, method: "Rocket", trxId: "RK81023471" },
-    ],
-  },
-  {
-    id: "BDS-PN-1044",
-    name: "S.M. Nahid Hasan",
-    batch: "2015",
-    phone: "+880 1911-778899",
-    package: "General Member",
-    totalPaid: 0,
-    lastPayment: null,
-    status: "Unpaid",
-    validUntil: null,
-    certificate: false,
-    dueAmount: 1000,
-    paymentHistory: [],
-  },
-  {
-    id: "BDS-PN-1045",
-    name: "Kazi Nusrat Jahan",
-    batch: "2018",
-    phone: "+880 1622-334455",
-    package: "General Member",
-    totalPaid: 1000,
-    lastPayment: "2026-08-01",
-    status: "Paid",
-    validUntil: "2027-08-01",
-    certificate: false,
-    paymentHistory: [
-      { date: "2026-08-01", amount: 1000, method: "bKash", trxId: "BK99301012" },
-    ],
-  },
-  {
-    id: "BDS-DN-0010",
-    name: "Dr. Kamal Uddin",
-    batch: "1995",
-    phone: "+880 1700-112233",
-    package: "Patron / Donor Member",
-    totalPaid: 50000,
-    lastPayment: "2026-03-17",
-    status: "Paid",
-    certificate: true,
-    paymentHistory: [
-      { date: "2026-03-17", amount: 50000, method: "Bank Transfer", trxId: "EBL-ONL-928471" },
-    ],
-  },
-  {
-    id: "BDS-GM-0620",
-    name: "Tariqul Islam Rifat",
-    batch: "2020",
-    phone: "+880 1300-112233",
-    package: "General Member",
-    totalPaid: 0,
-    lastPayment: null,
-    status: "Unpaid",
-    validUntil: null,
-    certificate: false,
-    dueAmount: 1000,
-    paymentHistory: [],
-  },
-  {
-    id: "BDS-LM-0205",
-    name: "Sabrina Sultana",
-    batch: "2002",
-    phone: "+880 1500-667788",
-    package: "Life Member",
-    totalPaid: 20000,
-    lastPayment: "2026-05-22",
-    status: "Paid",
-    certificate: true,
-    paymentHistory: [
-      { date: "2024-01-10", amount: 5000, method: "bKash", trxId: "BK10293847" },
-      { date: "2024-06-15", amount: 5000, method: "Nagad", trxId: "NG83920174" },
-      { date: "2025-02-20", amount: 5000, method: "bKash", trxId: "BK56789012" },
-      { date: "2026-05-22", amount: 5000, method: "bKash", trxId: "BK78901234" },
-    ],
-  },
-];
+import {
+  useAdminMembershipPackages,
+  useCreateMembershipPackage,
+  useUpdateMembershipPackage,
+  useToggleMembershipPackage,
+  useDeleteMembershipPackage,
+  useAdminMembers,
+} from "@/hooks/useQueries";
 
 const iconMap = {
   users: Users,
   crown: Crown,
   heart: Heart,
+  award: Award,
+  shield: ShieldCheck,
+  creditcard: CreditCard,
 };
 
 const colorMap = {
@@ -244,100 +63,306 @@ const colorMap = {
     badge: "bg-purple-100 text-purple-800",
     gradient: "from-purple-500 to-purple-600",
   },
+  emerald: {
+    bg: "bg-emerald-50",
+    border: "border-emerald-200",
+    text: "text-emerald-700",
+    icon: "bg-emerald-100 text-emerald-600",
+    badge: "bg-emerald-100 text-emerald-800",
+    gradient: "from-emerald-500 to-emerald-600",
+  },
+  rose: {
+    bg: "bg-rose-50",
+    border: "border-rose-200",
+    text: "text-rose-700",
+    icon: "bg-rose-100 text-rose-600",
+    badge: "bg-rose-100 text-rose-800",
+    gradient: "from-rose-500 to-rose-600",
+  },
 };
 
 export default function AdminMembershipFeesPage() {
-  const [packages, setPackages] = useState(defaultPackages);
-  const [members] = useState(memberFeeData);
   const [toastMsg, setToastMsg] = useState("");
   const [activeTab, setActiveTab] = useState("packages");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [packageFilter, setPackageFilter] = useState("all");
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showDetailModal, setShowDetailModal] = useState(null);
-  const [editingPackage, setEditingPackage] = useState(null);
 
-  // New package form
+  // Modals state
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editingPackage, setEditingPackage] = useState(null);
+  const [deleteConfirmPackage, setDeleteConfirmPackage] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(null);
+
+  // Form state for creating a new package
   const [newPkg, setNewPkg] = useState({
     name: "",
     namebn: "",
     fee: "",
-    cycle: "One-time",
+    cycle: "Annual",
     description: "",
     benefits: "",
     color: "sky",
     icon: "users",
+    isActive: true,
   });
+
+  // Backend React Query Hooks
+  const {
+    data: packages = [],
+    isLoading: isPackagesLoading,
+    isFetching: isPackagesFetching,
+    refetch: refetchPackages,
+  } = useAdminMembershipPackages();
+
+  const createPackageMutation = useCreateMembershipPackage();
+  const updatePackageMutation = useUpdateMembershipPackage();
+  const togglePackageMutation = useToggleMembershipPackage();
+  const deletePackageMutation = useDeleteMembershipPackage();
+
+  // Real backend members for fee tracking
+  const { data: dbMembers = [], isLoading: isMembersLoading } = useAdminMembers();
 
   const triggerToast = (msg) => {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(""), 4000);
   };
 
+  // Format DB Members for Membership Status Tab
+  const members = useMemo(() => {
+    if (!Array.isArray(dbMembers) || dbMembers.length === 0) return [];
+
+    return dbMembers.map((m) => {
+      const tierName =
+        m.packageData?.packageName ||
+        (m.membership === "life_member"
+          ? "Life Member"
+          : m.membership === "donor_member" || m.membership === "patron_member"
+            ? "Patron / Donor Member"
+            : "General Member");
+
+      const isPaid = (m.paymentStatus || "").toLowerCase() === "paid";
+      const feeAmount =
+        m.packageData?.fee ||
+        (tierName === "Life Member"
+          ? 20000
+          : tierName.includes("Donor")
+            ? 50000
+            : 1000);
+      const totalPaid = isPaid ? feeAmount : 0;
+
+      return {
+        id: m.membershipId || `BDS-${m._id?.slice(-6) || "0001"}`,
+        _id: m._id,
+        name: m.name || "Alumni Member",
+        nameBn: m.nameBn || "",
+        batch: m.batch ? String(m.batch) : "N/A",
+        phone: m.phone || "N/A",
+        email: m.email || "",
+        package: tierName,
+        totalPaid,
+        dueAmount: isPaid ? 0 : feeAmount,
+        lastPayment: m.membershipStartDate
+          ? new Date(m.membershipStartDate).toLocaleDateString()
+          : isPaid
+            ? "Recent"
+            : null,
+        status: isPaid ? "Paid" : "Unpaid",
+        certificate: tierName === "Life Member" || tierName.includes("Donor"),
+        paymentHistory: isPaid
+          ? [
+            {
+              date: m.membershipStartDate
+                ? new Date(m.membershipStartDate).toLocaleDateString()
+                : new Date().toLocaleDateString(),
+              amount: feeAmount,
+              method: "Online / Gateway",
+              trxId: `TRX-${m._id?.slice(-8).toUpperCase()}`,
+            },
+          ]
+          : [],
+      };
+    });
+  }, [dbMembers]);
+
   // ─── KPI Calculations ───
-  const totalCollected = members.reduce((sum, m) => sum + m.totalPaid, 0);
-  const paidMembers = members.filter((m) => m.status === "Paid").length;
-  const unpaidMembers = members.filter((m) => m.status === "Unpaid").length;
-  const lifeMembers = members.filter((m) => m.package === "Life Member").length;
+  const totalCollected = useMemo(
+    () => members.reduce((sum, m) => sum + (m.totalPaid || 0), 0),
+    [members]
+  );
+  const paidMembers = useMemo(
+    () => members.filter((m) => m.status === "Paid").length,
+    [members]
+  );
+  const unpaidMembers = useMemo(
+    () => members.filter((m) => m.status === "Unpaid").length,
+    [members]
+  );
+  const lifeMembers = useMemo(
+    () => members.filter((m) => m.package === "Life Member").length,
+    [members]
+  );
 
   // ─── Filtered Members ───
-  const filteredMembers = members.filter((m) => {
-    const matchesSearch =
-      m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.batch.includes(searchQuery);
-    const matchesStatus =
-      statusFilter === "all" || m.status.toLowerCase() === statusFilter;
-    const matchesPackage =
-      packageFilter === "all" || m.package === packageFilter;
-    return matchesSearch && matchesStatus && matchesPackage;
-  });
+  const filteredMembers = useMemo(() => {
+    return members.filter((m) => {
+      const q = searchQuery.toLowerCase();
+      const matchesSearch =
+        !q ||
+        m.name.toLowerCase().includes(q) ||
+        m.id.toLowerCase().includes(q) ||
+        m.batch.toLowerCase().includes(q) ||
+        m.phone.toLowerCase().includes(q);
 
-  // ─── Package CRUD handlers ───
-  const handleCreatePackage = (e) => {
-    e.preventDefault();
-    if (!newPkg.name || !newPkg.fee) return;
-    const pkg = {
-      id: `pkg-${Date.now()}`,
-      name: newPkg.name,
-      namebn: newPkg.namebn,
-      fee: Number(newPkg.fee),
-      cycle: newPkg.cycle,
-      description: newPkg.description,
-      benefits: newPkg.benefits
-        .split(",")
-        .map((b) => b.trim())
-        .filter(Boolean),
-      color: newPkg.color,
-      icon: newPkg.icon,
-      isActive: true,
-    };
-    setPackages((prev) => [...prev, pkg]);
-    setShowCreateModal(false);
-    setNewPkg({
-      name: "",
-      namebn: "",
-      fee: "",
-      cycle: "One-time",
-      description: "",
-      benefits: "",
-      color: "sky",
-      icon: "users",
+      const matchesStatus =
+        statusFilter === "all" || m.status.toLowerCase() === statusFilter;
+
+      const matchesPackage =
+        packageFilter === "all" || m.package === packageFilter;
+
+      return matchesSearch && matchesStatus && matchesPackage;
     });
-    triggerToast(`Package "${pkg.name}" created successfully.`);
+  }, [members, searchQuery, statusFilter, packageFilter]);
+
+  // ─── Package CRUD Handlers with Backend ───
+  const handleCreatePackage = async (e) => {
+    e.preventDefault();
+    if (!newPkg.name.trim() || newPkg.fee === "") return;
+
+    try {
+      await createPackageMutation.mutateAsync({
+        name: newPkg.name.trim(),
+        namebn: newPkg.namebn.trim(),
+        fee: Number(newPkg.fee),
+        cycle: newPkg.cycle,
+        description: newPkg.description.trim(),
+        benefits: newPkg.benefits,
+        color: newPkg.color,
+        icon: newPkg.icon,
+        isActive: newPkg.isActive,
+      });
+
+      setShowCreateModal(false);
+      setNewPkg({
+        name: "",
+        namebn: "",
+        fee: "",
+        cycle: "Annual",
+        description: "",
+        benefits: "",
+        color: "sky",
+        icon: "users",
+        isActive: true,
+      });
+      triggerToast(`Membership package "${newPkg.name}" created successfully.`);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleTogglePackage = (id) => {
-    setPackages((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, isActive: !p.isActive } : p))
-    );
+  const handleOpenEdit = (pkg) => {
+    setEditingPackage({
+      ...pkg,
+      benefitsText: Array.isArray(pkg.benefits)
+        ? pkg.benefits.join(", ")
+        : pkg.benefits || "",
+    });
   };
 
-  const handleDeletePackage = (id) => {
-    const pkg = packages.find((p) => p.id === id);
-    setPackages((prev) => prev.filter((p) => p.id !== id));
-    triggerToast(`Package "${pkg?.name}" removed.`);
+  const handleUpdatePackage = async (e) => {
+    e.preventDefault();
+    if (!editingPackage || !editingPackage.name.trim() || editingPackage.fee === "")
+      return;
+
+    try {
+      await updatePackageMutation.mutateAsync({
+        id: editingPackage._id || editingPackage.id,
+        packageData: {
+          name: editingPackage.name.trim(),
+          namebn: editingPackage.namebn ? editingPackage.namebn.trim() : "",
+          fee: Number(editingPackage.fee),
+          cycle: editingPackage.cycle,
+          description: editingPackage.description ? editingPackage.description.trim() : "",
+          benefits: editingPackage.benefitsText
+            ? editingPackage.benefitsText.split(",").map((b) => b.trim()).filter(Boolean)
+            : editingPackage.benefits,
+          color: editingPackage.color,
+          icon: editingPackage.icon,
+          isActive: editingPackage.isActive,
+        },
+      });
+
+      setEditingPackage(null);
+      triggerToast(`Package "${editingPackage.name}" updated successfully.`);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleTogglePackage = async (pkg) => {
+    try {
+      await togglePackageMutation.mutateAsync(pkg._id || pkg.id);
+      triggerToast(`Package "${pkg.name}" status updated.`);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeletePackage = async () => {
+    if (!deleteConfirmPackage) return;
+    try {
+      await deletePackageMutation.mutateAsync(
+        deleteConfirmPackage._id || deleteConfirmPackage.id
+      );
+      triggerToast(`Package "${deleteConfirmPackage.name}" deleted.`);
+      setDeleteConfirmPackage(null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleExportCSV = () => {
+    if (!filteredMembers.length) return;
+    const headers = [
+      "Membership ID",
+      "Name",
+      "Batch",
+      "Phone",
+      "Package",
+      "Total Paid (BDT)",
+      "Due Amount (BDT)",
+      "Last Payment",
+      "Status",
+      "Certificate",
+    ];
+
+    const escapeCsv = (val) => {
+      if (val === null || val === undefined) return '""';
+      return `"${String(val).replace(/"/g, '""')}"`;
+    };
+
+    const rows = filteredMembers.map((m) => [
+      escapeCsv(m.id),
+      escapeCsv(m.name),
+      escapeCsv(m.batch),
+      escapeCsv(m.phone),
+      escapeCsv(m.package),
+      escapeCsv(m.totalPaid),
+      escapeCsv(m.dueAmount),
+      escapeCsv(m.lastPayment || "Never"),
+      escapeCsv(m.status),
+      escapeCsv(m.certificate ? "Issued" : "No"),
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Biddyasetu_Membership_Fees_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -350,7 +375,7 @@ export default function AdminMembershipFeesPage() {
           <button
             type="button"
             onClick={() => setToastMsg("")}
-            className="ml-2 hover:opacity-75"
+            className="ml-2 hover:opacity-75 cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -358,27 +383,37 @@ export default function AdminMembershipFeesPage() {
       )}
 
       {/* ─── Page Header ─── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">
-            Membership & Fee Management
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
             Membership Fees & Packages
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Create packages, track annual dues, and manage life membership certifications.
+          <p className="text-xs text-slate-500 mt-1">
+            Manage membership tiers, fee structures, and member subscription statuses.
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white text-xs font-bold shadow-md shadow-sky-500/20 transition-all cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Create New Package</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => refetchPackages()}
+            className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors cursor-pointer"
+            title="Refresh packages"
+          >
+            <RefreshCw
+              className={`w-4 h-4 ${isPackagesFetching ? "animate-spin text-sky-600" : ""}`}
+            />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowCreateModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white text-xs font-bold shadow-md shadow-sky-500/20 transition-all cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            Add New Package
+          </button>
+        </div>
       </div>
 
       {/* ─── KPI Cards ─── */}
@@ -386,17 +421,17 @@ export default function AdminMembershipFeesPage() {
         <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-xs hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Total Fee Collected
+              Total Collected
             </span>
             <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5" />
+              <CreditCard className="w-5 h-5" />
             </div>
           </div>
           <div className="text-2xl font-black text-slate-900 mb-1">
             ৳{totalCollected.toLocaleString()}
           </div>
-          <div className="text-xs text-slate-500 font-medium">
-            From all membership tiers
+          <div className="text-xs text-slate-500 font-semibold">
+            Across {paidMembers} active contributions
           </div>
         </div>
 
@@ -410,24 +445,20 @@ export default function AdminMembershipFeesPage() {
             </div>
           </div>
           <div className="text-2xl font-black text-slate-900 mb-1">{paidMembers}</div>
-          <div className="text-xs text-emerald-600 font-semibold">
-            Up to date on fees
-          </div>
+          <div className="text-xs text-emerald-600 font-semibold">Up to date on fees</div>
         </div>
 
         <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-xs hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Unpaid / Overdue
+              Unpaid / Pending
             </span>
             <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
               <AlertCircle className="w-5 h-5" />
             </div>
           </div>
           <div className="text-2xl font-black text-slate-900 mb-1">{unpaidMembers}</div>
-          <div className="text-xs text-rose-600 font-semibold">
-            Require follow-up
-          </div>
+          <div className="text-xs text-rose-600 font-semibold">Awaiting payment</div>
         </div>
 
         <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-xs hover:shadow-md transition-shadow">
@@ -440,25 +471,23 @@ export default function AdminMembershipFeesPage() {
             </div>
           </div>
           <div className="text-2xl font-black text-slate-900 mb-1">{lifeMembers}</div>
-          <div className="text-xs text-amber-700 font-semibold">
-            Certified lifetime alumni
-          </div>
+          <div className="text-xs text-amber-700 font-semibold">Lifetime alumni members</div>
         </div>
       </div>
 
       {/* ─── Tab Switcher ─── */}
       <div className="flex items-center gap-1 bg-slate-100 rounded-2xl p-1 w-fit">
         {[
-          { key: "packages", label: "Membership Packages" },
-          { key: "members", label: "Member Fee Status" },
+          { key: "packages", label: `Membership Packages (${packages.length})` },
+          { key: "members", label: `Member Fee Status (${members.length})` },
         ].map((tab) => (
           <button
             key={tab.key}
             type="button"
             onClick={() => setActiveTab(tab.key)}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeTab === tab.key
-              ? "bg-white text-slate-900 shadow-sm"
-              : "text-slate-500 hover:text-slate-700"
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-500 hover:text-slate-700"
               }`}
           >
             {tab.label}
@@ -471,140 +500,172 @@ export default function AdminMembershipFeesPage() {
       {/* ═══════════════════════════════════════════════════════ */}
       {activeTab === "packages" && (
         <div className="space-y-6">
-          {/* Fee Structure Info Banner */}
+          {/* Fee Structure Policy Banner */}
           <div className="bg-gradient-to-r from-sky-50 to-indigo-50 border border-sky-200/80 rounded-3xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center shrink-0">
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
               <h3 className="font-bold text-sm text-slate-900 mb-1">
-                Biddyasetu Fee Structure Policy
+                Biddyasetu Membership Fee Structure Policy
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                The annual subscription fee is a minimum of{" "}
-                <strong className="text-sky-700">৳1,000.00</strong> collected
-                annually. If any member pays{" "}
-                <strong className="text-amber-700">
-                  ৳20,000 (20 years&apos; worth)
-                </strong>{" "}
-                as a lump sum, they are automatically elevated to{" "}
-                <strong className="text-amber-700">Life Member</strong> status
-                and receive an official Life Membership Certificate.
+                Admins can create, edit, activate/deactivate, and delete membership tiers in real-time. Changes are stored in the backend and reflected across public registration and user payment flows.
               </p>
             </div>
           </div>
 
           {/* Package Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-            {packages.map((pkg) => {
-              const colors = colorMap[pkg.color] || colorMap.sky;
-              const IconComp = iconMap[pkg.icon] || Users;
-
-              return (
+          {isPackagesLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              {[...Array(3)].map((_, idx) => (
                 <div
-                  key={pkg.id}
-                  className={`bg-white rounded-3xl border ${colors.border} shadow-xs hover:shadow-md transition-all relative overflow-hidden ${!pkg.isActive ? "opacity-60" : ""
-                    }`}
+                  key={idx}
+                  className="bg-white rounded-3xl border border-slate-200 p-6 animate-pulse space-y-4"
                 >
-                  {/* Package Header */}
-                  <div className={`${colors.bg} p-5 border-b ${colors.border}`}>
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-11 h-11 rounded-xl ${colors.icon} flex items-center justify-center`}>
-                          <IconComp className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-base text-slate-900">
-                            {pkg.name}
-                          </h3>
-                          {pkg.namebn && (
-                            <div className="text-xs text-slate-500 font-medium">
-                              {pkg.namebn}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${pkg.isActive
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-slate-200 text-slate-500"
-                        }`}
-                      >
-                        {pkg.isActive ? "Active" : "Inactive"}
-                      </span>
-                    </div>
-
-                    {/* Price */}
-                    <div className="mt-4 flex items-baseline gap-1">
-                      <span className="text-3xl font-black text-slate-900">
-                        ৳{pkg.fee.toLocaleString()}
-                      </span>
-                      <span className="text-xs text-slate-500 font-semibold">
-                        / {pkg.cycle}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Package Body */}
-                  <div className="p-5">
-                    <p className="text-xs text-slate-600 leading-relaxed mb-4">
-                      {pkg.description}
-                    </p>
-
-                    {/* Benefits List */}
-                    <div className="space-y-2 mb-5">
-                      <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                        Benefits Included
-                      </div>
-                      {pkg.benefits.map((b, i) => (
-                        <div
-                          key={i}
-                          className="flex items-start gap-2 text-xs text-slate-700"
-                        >
-                          <CheckCircle2 className={`w-3.5 h-3.5 ${colors.text} shrink-0 mt-0.5`} />
-                          <span>{b}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Package Actions */}
-                    <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
-                      <button
-                        type="button"
-                        onClick={() => handleTogglePackage(pkg.id)}
-                        className={`flex-1 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${pkg.isActive
-                          ? "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                          : "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                          }`}
-                      >
-                        {pkg.isActive ? "Deactivate" : "Activate"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeletePackage(pkg.id)}
-                        className="p-2 rounded-xl border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-colors cursor-pointer"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
+                  <div className="h-6 bg-slate-200 rounded w-1/2" />
+                  <div className="h-8 bg-slate-200 rounded w-1/3" />
+                  <div className="h-16 bg-slate-200 rounded" />
+                  <div className="h-10 bg-slate-200 rounded" />
                 </div>
-              );
-            })}
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              {packages.map((pkg) => {
+                const pkgId = pkg._id || pkg.id;
+                const colors = colorMap[pkg.color] || colorMap.sky;
+                const IconComp = iconMap[pkg.icon] || Users;
 
-            {/* Add New Package Card */}
-            <button
-              type="button"
-              onClick={() => setShowCreateModal(true)}
-              className="bg-white rounded-3xl border-2 border-dashed border-slate-200 hover:border-sky-300 hover:bg-sky-50/30 transition-all min-h-[320px] flex flex-col items-center justify-center gap-3 cursor-pointer group"
-            >
-              <div className="w-14 h-14 rounded-2xl bg-slate-100 group-hover:bg-sky-100 text-slate-400 group-hover:text-sky-500 flex items-center justify-center transition-colors">
-                <Plus className="w-7 h-7" />
-              </div>
-              <span className="text-sm font-bold text-slate-400 group-hover:text-sky-600 transition-colors">
-                Create New Package
-              </span>
-            </button>
-          </div>
+                return (
+                  <div
+                    key={pkgId}
+                    className={`bg-white rounded-3xl border ${colors.border} shadow-xs hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between ${!pkg.isActive ? "opacity-65" : ""
+                      }`}
+                  >
+                    <div>
+                      {/* Package Header */}
+                      <div className={`${colors.bg} p-5 border-b ${colors.border}`}>
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`w-11 h-11 rounded-xl ${colors.icon} flex items-center justify-center`}
+                            >
+                              <IconComp className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <h3 className="font-bold text-base text-slate-900">
+                                {pkg.name}
+                              </h3>
+                              {pkg.namebn && (
+                                <div className="text-xs text-slate-500 font-medium">
+                                  {pkg.namebn}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <span
+                            className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold ${pkg.isActive
+                                ? "bg-emerald-100 text-emerald-700 border border-emerald-300"
+                                : "bg-slate-200 text-slate-600"
+                              }`}
+                          >
+                            {pkg.isActive ? "Active" : "Inactive"}
+                          </span>
+                        </div>
+
+                        {/* Price */}
+                        <div className="mt-4 flex items-baseline gap-1">
+                          <span className="text-3xl font-black text-slate-900">
+                            ৳{Number(pkg.fee).toLocaleString()}
+                          </span>
+                          <span className="text-xs text-slate-500 font-semibold">
+                            / {pkg.cycle || "Annual"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Package Body */}
+                      <div className="p-5">
+                        <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                          {pkg.description || "Official membership package for alumni."}
+                        </p>
+
+                        {/* Benefits List */}
+                        {Array.isArray(pkg.benefits) && pkg.benefits.length > 0 && (
+                          <div className="space-y-2 mb-5">
+                            <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                              Benefits Included
+                            </div>
+                            {pkg.benefits.map((b, i) => (
+                              <div
+                                key={i}
+                                className="flex items-start gap-2 text-xs text-slate-700"
+                              >
+                                <CheckCircle2
+                                  className={`w-3.5 h-3.5 ${colors.text} shrink-0 mt-0.5`}
+                                />
+                                <span>{b}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Package Actions Footer */}
+                    <div className="p-5 pt-0">
+                      <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
+                        <button
+                          type="button"
+                          onClick={() => handleTogglePackage(pkg)}
+                          disabled={togglePackageMutation.isPending}
+                          className={`flex-1 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${pkg.isActive
+                              ? "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                              : "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                            }`}
+                        >
+                          {pkg.isActive ? "Deactivate" : "Activate"}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEdit(pkg)}
+                          className="p-2 rounded-xl border border-slate-200 text-slate-500 hover:text-sky-600 hover:border-sky-200 hover:bg-sky-50 transition-colors cursor-pointer"
+                          title="Edit Package"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setDeleteConfirmPackage(pkg)}
+                          className="p-2 rounded-xl border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-colors cursor-pointer"
+                          title="Delete Package"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Add New Package Card Trigger */}
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(true)}
+                className="bg-white rounded-3xl border-2 border-dashed border-slate-200 hover:border-sky-300 hover:bg-sky-50/30 transition-all min-h-[320px] flex flex-col items-center justify-center gap-3 cursor-pointer group"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-slate-100 group-hover:bg-sky-100 text-slate-400 group-hover:text-sky-500 flex items-center justify-center transition-colors">
+                  <Plus className="w-7 h-7" />
+                </div>
+                <span className="text-sm font-bold text-slate-500 group-hover:text-sky-600 transition-colors">
+                  Create New Package
+                </span>
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -621,17 +682,17 @@ export default function AdminMembershipFeesPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by name, member ID, or batch..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-sky-500 transition-colors"
+                placeholder="Search by name, member ID, batch, or phone..."
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-sky-500 transition-colors bg-white"
               />
             </div>
 
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 focus:outline-none focus:border-sky-500"
+              className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 bg-white focus:outline-none focus:border-sky-500"
             >
-              <option value="all">All Status</option>
+              <option value="all">All Payment Status</option>
               <option value="paid">Paid</option>
               <option value="unpaid">Unpaid</option>
             </select>
@@ -639,16 +700,17 @@ export default function AdminMembershipFeesPage() {
             <select
               value={packageFilter}
               onChange={(e) => setPackageFilter(e.target.value)}
-              className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 focus:outline-none focus:border-sky-500"
+              className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 bg-white focus:outline-none focus:border-sky-500"
             >
               <option value="all">All Packages</option>
               <option value="General Member">General Member</option>
               <option value="Life Member">Life Member</option>
-              <option value="Patron / Donor Member">Patron / Donor</option>
+              <option value="Patron / Donor Member">Patron / Donor Member</option>
             </select>
 
             <button
               type="button"
+              onClick={handleExportCSV}
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold text-slate-600 transition-colors cursor-pointer"
             >
               <Download className="w-4 h-4" />
@@ -658,10 +720,8 @@ export default function AdminMembershipFeesPage() {
 
           {/* Summary Bar */}
           <div className="text-xs text-slate-500 font-medium">
-            Showing{" "}
-            <strong className="text-slate-900">{filteredMembers.length}</strong>{" "}
-            of <strong className="text-slate-900">{members.length}</strong>{" "}
-            members
+            Showing <strong className="text-slate-900">{filteredMembers.length}</strong> of{" "}
+            <strong className="text-slate-900">{members.length}</strong> alumni members
           </div>
 
           {/* Members Table */}
@@ -682,191 +742,162 @@ export default function AdminMembershipFeesPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium">
-                  {filteredMembers.map((m) => (
-                    <tr
-                      key={m.id}
-                      className="hover:bg-slate-50/60 transition-colors"
-                    >
-                      {/* Member Info */}
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${m.status === "Paid"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-rose-100 text-rose-700"
-                            }`}
-                          >
-                            {m.name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .slice(0, 2)
-                              .join("")}
-                          </div>
-                          <div className="min-w-0">
-                            <div className="font-bold text-slate-900 truncate">
-                              {m.name}
+                  {isMembersLoading ? (
+                    <tr>
+                      <td colSpan={9} className="text-center py-10 text-slate-400">
+                        Loading member fee records...
+                      </td>
+                    </tr>
+                  ) : filteredMembers.length === 0 ? (
+                    <tr>
+                      <td colSpan={9} className="text-center py-12 text-slate-400">
+                        No member records match the selected filters.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredMembers.map((m) => (
+                      <tr key={m.id} className="hover:bg-slate-50/60 transition-colors">
+                        {/* Member Info */}
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${m.status === "Paid"
+                                  ? "bg-emerald-100 text-emerald-700"
+                                  : "bg-rose-100 text-rose-700"
+                                }`}
+                            >
+                              {m.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .slice(0, 2)
+                                .join("")}
                             </div>
-                            <div className="text-[11px] text-slate-500 font-mono">
-                              {m.id}
+                            <div className="min-w-0">
+                              <div className="font-bold text-slate-900 truncate">
+                                {m.name}
+                              </div>
+                              <div className="text-[11px] text-slate-500 font-mono">
+                                {m.id}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Batch */}
-                      <td className="px-5 py-4">
-                        <span className="px-2 py-0.5 rounded-lg bg-sky-100 text-sky-800 font-bold text-[11px]">
-                          {m.batch}
-                        </span>
-                      </td>
-
-                      {/* Package */}
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-1.5">
-                          {m.package === "Life Member" && (
-                            <Crown className="w-3.5 h-3.5 text-amber-500" />
-                          )}
-                          {m.package === "Patron / Donor Member" && (
-                            <Heart className="w-3.5 h-3.5 text-purple-500" />
-                          )}
-                          <span className="font-semibold text-slate-700 text-[11px]">
-                            {m.package}
+                        {/* Batch */}
+                        <td className="px-5 py-4">
+                          <span className="px-2 py-0.5 rounded-lg bg-sky-100 text-sky-800 font-bold text-[11px]">
+                            {m.batch}
                           </span>
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Total Paid */}
-                      <td className="px-5 py-4 font-bold text-slate-900">
-                        ৳{m.totalPaid.toLocaleString()}
-                      </td>
-
-                      {/* Due Amount */}
-                      <td className="px-5 py-4">
-                        {m.dueAmount ? (
-                          <span className="font-bold text-rose-600">
-                            ৳{m.dueAmount.toLocaleString()}
-                          </span>
-                        ) : (
-                          <span className="text-slate-400 font-medium">—</span>
-                        )}
-                      </td>
-
-                      {/* Last Payment */}
-                      <td className="px-5 py-4 text-slate-600">
-                        {m.lastPayment || (
-                          <span className="text-slate-400 italic">Never</span>
-                        )}
-                      </td>
-
-                      {/* Status */}
-                      <td className="px-5 py-4">
-                        <span className={`px-2.5 py-1 rounded-full font-bold text-[10px] ${m.status === "Paid"
-                          ? "bg-emerald-100 text-emerald-800"
-                          : "bg-rose-100 text-rose-800"
-                          }`}
-                        >
-                          {m.status === "Paid" ? "✓ Paid" : "✗ Unpaid"}
-                        </span>
-                      </td>
-
-                      {/* Certificate */}
-                      <td className="px-5 py-4">
-                        {m.certificate ? (
-                          <div className="flex items-center gap-1 text-amber-600">
-                            <Award className="w-4 h-4" />
-                            <span className="text-[10px] font-bold">Issued</span>
+                        {/* Package */}
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-1.5">
+                            {m.package === "Life Member" && (
+                              <Crown className="w-3.5 h-3.5 text-amber-500" />
+                            )}
+                            {m.package.includes("Donor") && (
+                              <Heart className="w-3.5 h-3.5 text-purple-500" />
+                            )}
+                            <span className="font-semibold text-slate-700 text-[11px]">
+                              {m.package}
+                            </span>
                           </div>
-                        ) : (
-                          <span className="text-slate-400 text-[10px]">—</span>
-                        )}
-                      </td>
+                        </td>
 
-                      {/* Actions */}
-                      <td className="px-5 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={() => setShowDetailModal(m)}
-                            className="p-1.5 rounded-xl border border-slate-200 text-slate-500 hover:text-sky-600 hover:border-sky-200 hover:bg-sky-50 transition-colors cursor-pointer"
-                            title="View Payment History"
+                        {/* Total Paid */}
+                        <td className="px-5 py-4 font-bold text-slate-900">
+                          ৳{m.totalPaid.toLocaleString()}
+                        </td>
+
+                        {/* Due Amount */}
+                        <td className="px-5 py-4">
+                          {m.dueAmount ? (
+                            <span className="font-bold text-rose-600">
+                              ৳{m.dueAmount.toLocaleString()}
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 font-medium">—</span>
+                          )}
+                        </td>
+
+                        {/* Last Payment */}
+                        <td className="px-5 py-4 text-slate-600">
+                          {m.lastPayment || (
+                            <span className="text-slate-400 italic">Never</span>
+                          )}
+                        </td>
+
+                        {/* Status */}
+                        <td className="px-5 py-4">
+                          <span
+                            className={`px-2.5 py-1 rounded-full font-bold text-[10px] ${m.status === "Paid"
+                                ? "bg-emerald-100 text-emerald-800"
+                                : "bg-rose-100 text-rose-800"
+                              }`}
                           >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          {m.status === "Unpaid" && (
+                            {m.status === "Paid" ? "✓ Paid" : "✗ Unpaid"}
+                          </span>
+                        </td>
+
+                        {/* Certificate */}
+                        <td className="px-5 py-4">
+                          {m.certificate ? (
+                            <div className="flex items-center gap-1 text-amber-600">
+                              <Award className="w-4 h-4" />
+                              <span className="text-[10px] font-bold">Issued</span>
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 text-[10px]">—</span>
+                          )}
+                        </td>
+
+                        {/* Actions */}
+                        <td className="px-5 py-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
                             <button
                               type="button"
-                              onClick={() =>
-                                triggerToast(
-                                  `Payment reminder sent to ${m.name} via SMS.`
-                                )
-                              }
-                              className="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-[10px] transition-colors cursor-pointer"
+                              onClick={() => setShowDetailModal(m)}
+                              className="p-1.5 rounded-xl border border-slate-200 text-slate-500 hover:text-sky-600 hover:border-sky-200 hover:bg-sky-50 transition-colors cursor-pointer"
+                              title="View Payment History"
                             >
-                              Send Reminder
+                              <Eye className="w-4 h-4" />
                             </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-
-                  {filteredMembers.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={9}
-                        className="text-center py-12 text-slate-400 text-xs"
-                      >
-                        No members match the current filters.
-                      </td>
-                    </tr>
+                            {m.status === "Unpaid" && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  triggerToast(
+                                    `Payment reminder sent to ${m.name} (${m.phone}).`
+                                  )
+                                }
+                                className="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-[10px] transition-colors cursor-pointer"
+                              >
+                                Send Reminder
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
                   )}
                 </tbody>
               </table>
             </div>
           </div>
-
-          {/* Unpaid Members Call-to-Action */}
-          {unpaidMembers > 0 && (
-            <div className="bg-gradient-to-r from-rose-50 to-amber-50 border border-rose-200/80 rounded-3xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <div className="w-11 h-11 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
-                <Send className="w-5 h-5" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-sm text-slate-900 mb-1">
-                  {unpaidMembers} Member{unpaidMembers > 1 ? "s" : ""} with
-                  Outstanding Dues
-                </h3>
-                <p className="text-xs text-slate-600">
-                  Send batch SMS/Email reminders to all members with unpaid
-                  annual subscription fees.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() =>
-                  triggerToast(
-                    `Batch payment reminders sent to ${unpaidMembers} members.`
-                  )
-                }
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md transition-all cursor-pointer"
-              >
-                <Send className="w-4 h-4" />
-                Send Bulk Reminder
-              </button>
-            </div>
-          )}
         </div>
       )}
 
       {/* ═══════════════════════════════════════════════════════ */}
-      {/* ─── CREATE PACKAGE MODAL ─── */}
+      {/* ─── MODAL 1: CREATE PACKAGE MODAL ─── */}
       {/* ═══════════════════════════════════════════════════════ */}
       {showCreateModal && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-950/65 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-sky-100 relative max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-sky-100 relative max-h-[90vh] overflow-y-auto">
             <button
               type="button"
               onClick={() => setShowCreateModal(false)}
-              className="absolute top-5 right-5 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+              className="absolute top-5 right-5 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -875,7 +906,7 @@ export default function AdminMembershipFeesPage() {
               Create Membership Package
             </h3>
             <p className="text-xs text-slate-500 mb-5">
-              Define a new membership tier with pricing and benefits.
+              Define a new alumni membership tier with fee and benefits.
             </p>
 
             <form onSubmit={handleCreatePackage} className="space-y-4 text-xs">
@@ -887,10 +918,8 @@ export default function AdminMembershipFeesPage() {
                   type="text"
                   required
                   value={newPkg.name}
-                  onChange={(e) =>
-                    setNewPkg({ ...newPkg, name: e.target.value })
-                  }
-                  placeholder="e.g. Honorary Member"
+                  onChange={(e) => setNewPkg({ ...newPkg, name: e.target.value })}
+                  placeholder="e.g. Associate Member"
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-medium focus:outline-none focus:border-sky-500"
                 />
               </div>
@@ -902,10 +931,8 @@ export default function AdminMembershipFeesPage() {
                 <input
                   type="text"
                   value={newPkg.namebn}
-                  onChange={(e) =>
-                    setNewPkg({ ...newPkg, namebn: e.target.value })
-                  }
-                  placeholder="e.g. সম্মানসূচক সদস্য"
+                  onChange={(e) => setNewPkg({ ...newPkg, namebn: e.target.value })}
+                  placeholder="e.g. সহযোগী সদস্য"
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-medium focus:outline-none focus:border-sky-500"
                 />
               </div>
@@ -913,16 +940,14 @@ export default function AdminMembershipFeesPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    Fee Amount (৳) *
+                    Fee Amount (৳ BDT) *
                   </label>
                   <input
                     type="number"
                     required
                     min={0}
                     value={newPkg.fee}
-                    onChange={(e) =>
-                      setNewPkg({ ...newPkg, fee: e.target.value })
-                    }
+                    onChange={(e) => setNewPkg({ ...newPkg, fee: e.target.value })}
                     placeholder="1000"
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-medium focus:outline-none focus:border-sky-500"
                   />
@@ -933,14 +958,13 @@ export default function AdminMembershipFeesPage() {
                   </label>
                   <select
                     value={newPkg.cycle}
-                    onChange={(e) =>
-                      setNewPkg({ ...newPkg, cycle: e.target.value })
-                    }
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-medium focus:outline-none focus:border-sky-500"
+                    onChange={(e) => setNewPkg({ ...newPkg, cycle: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-medium focus:outline-none focus:border-sky-500 bg-white"
                   >
-                    <option>Annual</option>
-                    <option>One-time</option>
-                    <option>Monthly</option>
+                    <option value="Annual">Annual</option>
+                    <option value="One-time">One-time</option>
+                    <option value="Lifetime">Lifetime</option>
+                    <option value="Monthly">Monthly</option>
                   </select>
                 </div>
               </div>
@@ -950,11 +974,9 @@ export default function AdminMembershipFeesPage() {
                   Description
                 </label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   value={newPkg.description}
-                  onChange={(e) =>
-                    setNewPkg({ ...newPkg, description: e.target.value })
-                  }
+                  onChange={(e) => setNewPkg({ ...newPkg, description: e.target.value })}
                   placeholder="Brief description of this membership tier..."
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-medium focus:outline-none focus:border-sky-500"
                 />
@@ -967,8 +989,172 @@ export default function AdminMembershipFeesPage() {
                 <input
                   type="text"
                   value={newPkg.benefits}
+                  onChange={(e) => setNewPkg({ ...newPkg, benefits: e.target.value })}
+                  placeholder="Alumni Directory, Voting Rights, AGM Pass"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-medium focus:outline-none focus:border-sky-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    Theme Color
+                  </label>
+                  <select
+                    value={newPkg.color}
+                    onChange={(e) => setNewPkg({ ...newPkg, color: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-medium focus:outline-none focus:border-sky-500 bg-white"
+                  >
+                    <option value="sky">Blue (Sky)</option>
+                    <option value="amber">Gold (Amber)</option>
+                    <option value="purple">Purple</option>
+                    <option value="emerald">Green (Emerald)</option>
+                    <option value="rose">Red (Rose)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    Icon
+                  </label>
+                  <select
+                    value={newPkg.icon}
+                    onChange={(e) => setNewPkg({ ...newPkg, icon: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-medium focus:outline-none focus:border-sky-500 bg-white"
+                  >
+                    <option value="users">Users</option>
+                    <option value="crown">Crown</option>
+                    <option value="heart">Heart</option>
+                    <option value="award">Award</option>
+                    <option value="shield">Shield</option>
+                    <option value="creditcard">Credit Card</option>
+                  </select>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={createPackageMutation.isPending}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold text-xs shadow-md shadow-sky-500/25 transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                <Plus className="w-4 h-4" />
+                {createPackageMutation.isPending
+                  ? "Saving to Backend..."
+                  : "Create Membership Package"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════ */}
+      {/* ─── MODAL 2: EDIT PACKAGE MODAL ─── */}
+      {/* ═══════════════════════════════════════════════════════ */}
+      {editingPackage && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-950/65 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-sky-100 relative max-h-[90vh] overflow-y-auto">
+            <button
+              type="button"
+              onClick={() => setEditingPackage(null)}
+              className="absolute top-5 right-5 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <h3 className="text-lg font-black text-slate-900 mb-1">
+              Edit Membership Package
+            </h3>
+            <p className="text-xs text-slate-500 mb-5">
+              Modify package name, fees, cycle, and benefits.
+            </p>
+
+            <form onSubmit={handleUpdatePackage} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-bold uppercase tracking-wider text-slate-700 mb-1">
+                  Package Name (English) *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editingPackage.name}
                   onChange={(e) =>
-                    setNewPkg({ ...newPkg, benefits: e.target.value })
+                    setEditingPackage({ ...editingPackage, name: e.target.value })
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-medium focus:outline-none focus:border-sky-500"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold uppercase tracking-wider text-slate-700 mb-1">
+                  Package Name (বাংলা)
+                </label>
+                <input
+                  type="text"
+                  value={editingPackage.namebn || ""}
+                  onChange={(e) =>
+                    setEditingPackage({ ...editingPackage, namebn: e.target.value })
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-medium focus:outline-none focus:border-sky-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    Fee Amount (৳ BDT) *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min={0}
+                    value={editingPackage.fee}
+                    onChange={(e) =>
+                      setEditingPackage({ ...editingPackage, fee: e.target.value })
+                    }
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-medium focus:outline-none focus:border-sky-500"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    Billing Cycle
+                  </label>
+                  <select
+                    value={editingPackage.cycle || "Annual"}
+                    onChange={(e) =>
+                      setEditingPackage({ ...editingPackage, cycle: e.target.value })
+                    }
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-medium focus:outline-none focus:border-sky-500 bg-white"
+                  >
+                    <option value="Annual">Annual</option>
+                    <option value="One-time">One-time</option>
+                    <option value="Lifetime">Lifetime</option>
+                    <option value="Monthly">Monthly</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold uppercase tracking-wider text-slate-700 mb-1">
+                  Description
+                </label>
+                <textarea
+                  rows={2}
+                  value={editingPackage.description || ""}
+                  onChange={(e) =>
+                    setEditingPackage({ ...editingPackage, description: e.target.value })
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-medium focus:outline-none focus:border-sky-500"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold uppercase tracking-wider text-slate-700 mb-1">
+                  Benefits (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  value={editingPackage.benefitsText || ""}
+                  onChange={(e) =>
+                    setEditingPackage({ ...editingPackage, benefitsText: e.target.value })
                   }
                   placeholder="Benefit 1, Benefit 2, Benefit 3"
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-medium focus:outline-none focus:border-sky-500"
@@ -981,15 +1167,17 @@ export default function AdminMembershipFeesPage() {
                     Theme Color
                   </label>
                   <select
-                    value={newPkg.color}
+                    value={editingPackage.color || "sky"}
                     onChange={(e) =>
-                      setNewPkg({ ...newPkg, color: e.target.value })
+                      setEditingPackage({ ...editingPackage, color: e.target.value })
                     }
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-medium focus:outline-none focus:border-sky-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-medium focus:outline-none focus:border-sky-500 bg-white"
                   >
                     <option value="sky">Blue (Sky)</option>
                     <option value="amber">Gold (Amber)</option>
                     <option value="purple">Purple</option>
+                    <option value="emerald">Green (Emerald)</option>
+                    <option value="rose">Red (Rose)</option>
                   </select>
                 </div>
                 <div>
@@ -997,25 +1185,46 @@ export default function AdminMembershipFeesPage() {
                     Icon
                   </label>
                   <select
-                    value={newPkg.icon}
+                    value={editingPackage.icon || "users"}
                     onChange={(e) =>
-                      setNewPkg({ ...newPkg, icon: e.target.value })
+                      setEditingPackage({ ...editingPackage, icon: e.target.value })
                     }
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-medium focus:outline-none focus:border-sky-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-medium focus:outline-none focus:border-sky-500 bg-white"
                   >
                     <option value="users">Users</option>
                     <option value="crown">Crown</option>
                     <option value="heart">Heart</option>
+                    <option value="award">Award</option>
+                    <option value="shield">Shield</option>
+                    <option value="creditcard">Credit Card</option>
                   </select>
                 </div>
               </div>
 
+              <div className="flex items-center gap-2 pt-1">
+                <input
+                  type="checkbox"
+                  id="editIsActive"
+                  checked={editingPackage.isActive !== false}
+                  onChange={(e) =>
+                    setEditingPackage({ ...editingPackage, isActive: e.target.checked })
+                  }
+                  className="rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                />
+                <label htmlFor="editIsActive" className="text-xs font-semibold text-slate-700 cursor-pointer">
+                  Active (Available for member registration)
+                </label>
+              </div>
+
               <button
                 type="submit"
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold text-xs shadow-md shadow-sky-500/25 transition-all cursor-pointer flex items-center justify-center gap-2"
+                disabled={updatePackageMutation.isPending}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold text-xs shadow-md shadow-sky-500/25 transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <Plus className="w-4 h-4" />
-                Create Membership Package
+                <Edit3 className="w-4 h-4" />
+                {updatePackageMutation.isPending
+                  ? "Saving Changes..."
+                  : "Save Changes"}
               </button>
             </form>
           </div>
@@ -1023,7 +1232,42 @@ export default function AdminMembershipFeesPage() {
       )}
 
       {/* ═══════════════════════════════════════════════════════ */}
-      {/* ─── MEMBER DETAIL / PAYMENT HISTORY MODAL ─── */}
+      {/* ─── MODAL 3: DELETE CONFIRMATION ─── */}
+      {/* ═══════════════════════════════════════════════════════ */}
+      {deleteConfirmPackage && (
+        <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-slate-950/65 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl border border-rose-100 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-4">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-black text-slate-900 mb-2">Delete Package?</h3>
+            <p className="text-xs text-slate-500 mb-6">
+              Are you sure you want to remove{" "}
+              <strong>&quot;{deleteConfirmPackage.name}&quot;</strong>? Existing members who subscribed to this package will keep their records.
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmPackage(null)}
+                className="flex-1 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeletePackage}
+                disabled={deletePackageMutation.isPending}
+                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition-colors cursor-pointer disabled:opacity-50"
+              >
+                {deletePackageMutation.isPending ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════ */}
+      {/* ─── MODAL 4: MEMBER DETAIL / PAYMENT HISTORY MODAL ─── */}
       {/* ═══════════════════════════════════════════════════════ */}
       {showDetailModal && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-950/65 backdrop-blur-xs animate-fadeIn">
@@ -1031,17 +1275,18 @@ export default function AdminMembershipFeesPage() {
             <button
               type="button"
               onClick={() => setShowDetailModal(null)}
-              className="absolute top-5 right-5 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+              className="absolute top-5 right-5 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
             {/* Member Header */}
             <div className="flex items-center gap-4 mb-5 pb-4 border-b border-slate-200">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-sm ${showDetailModal.status === "Paid"
-                ? "bg-emerald-100 text-emerald-700"
-                : "bg-rose-100 text-rose-700"
-                }`}
+              <div
+                className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-sm ${showDetailModal.status === "Paid"
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-rose-100 text-rose-700"
+                  }`}
               >
                 {showDetailModal.name
                   .split(" ")
@@ -1085,10 +1330,11 @@ export default function AdminMembershipFeesPage() {
                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                   Status
                 </div>
-                <span className={`inline-block mt-1 px-2 py-0.5 rounded-full font-bold text-[10px] ${showDetailModal.status === "Paid"
-                  ? "bg-emerald-100 text-emerald-800"
-                  : "bg-rose-100 text-rose-800"
-                  }`}
+                <span
+                  className={`inline-block mt-1 px-2 py-0.5 rounded-full font-bold text-[10px] ${showDetailModal.status === "Paid"
+                      ? "bg-emerald-100 text-emerald-800"
+                      : "bg-rose-100 text-rose-800"
+                    }`}
                 >
                   {showDetailModal.status}
                 </span>
@@ -1100,42 +1346,14 @@ export default function AdminMembershipFeesPage() {
                 <div className="mt-1">
                   {showDetailModal.certificate ? (
                     <span className="flex items-center gap-1 text-amber-600 font-bold text-xs">
-                      <Award className="w-4 h-4" /> Issued
+                      <Award className="w-4 h-4" /> Eligible / Issued
                     </span>
                   ) : (
-                    <span className="text-xs text-slate-400">Not Issued</span>
+                    <span className="text-xs text-slate-400">Not Applicable</span>
                   )}
                 </div>
               </div>
             </div>
-
-            {/* Life Member Upgrade Progress */}
-            {showDetailModal.package === "General Member" && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-5">
-                <div className="flex items-center gap-2 mb-2">
-                  <Crown className="w-4 h-4 text-amber-600" />
-                  <span className="text-xs font-bold text-amber-800">
-                    Life Membership Progress
-                  </span>
-                </div>
-                <div className="w-full bg-amber-200 rounded-full h-2 mb-2">
-                  <div
-                    className="bg-gradient-to-r from-amber-500 to-amber-600 h-2 rounded-full transition-all"
-                    style={{
-                      width: `${Math.min(
-                        (showDetailModal.totalPaid / 20000) * 100,
-                        100
-                      )}%`,
-                    }}
-                  />
-                </div>
-                <div className="text-[11px] text-amber-700 font-semibold">
-                  ৳{showDetailModal.totalPaid.toLocaleString()} / ৳20,000 —{" "}
-                  {Math.round((showDetailModal.totalPaid / 20000) * 100)}%
-                  towards Life Member
-                </div>
-              </div>
-            )}
 
             {/* Payment History */}
             <div>
@@ -1183,7 +1401,7 @@ export default function AdminMembershipFeesPage() {
                   type="button"
                   onClick={() => {
                     triggerToast(
-                      `Payment reminder sent to ${showDetailModal.name}.`
+                      `Payment reminder sent to ${showDetailModal.name} (${showDetailModal.phone}).`
                     );
                     setShowDetailModal(null);
                   }}
