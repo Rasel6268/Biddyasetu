@@ -13,7 +13,7 @@ export default function sitemap() {
     {
       url: `${baseUrl}/about`,
       lastModified,
-      changeFrequency: "monthly", cd
+      changeFrequency: "monthly",
       priority: 0.8,
     },
     {
