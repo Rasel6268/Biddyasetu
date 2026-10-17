@@ -15,6 +15,8 @@ import {
   Award,
   ExternalLink,
   ChevronRight,
+  Camera,
+  BarChart3,
 } from "lucide-react";
 
 export default function AdminSidebar({ mobileSidebarOpen, setMobileSidebarOpen }) {
@@ -51,6 +53,11 @@ export default function AdminSidebar({ mobileSidebarOpen, setMobileSidebarOpen }
       badgeColor: "bg-rose-500",
     },
     {
+      label: "Financial Reports",
+      href: "/admin/financial-reports",
+      icon: BarChart3,
+    },
+    {
       label: "Student Scholarships",
       href: "/admin/scholarships",
       icon: GraduationCap,
@@ -59,6 +66,11 @@ export default function AdminSidebar({ mobileSidebarOpen, setMobileSidebarOpen }
       label: "Events & Reunions",
       href: "/admin/events",
       icon: Calendar,
+    },
+    {
+      label: "Activity Gallery",
+      href: "/admin/gallery",
+      icon: Camera,
     },
     {
       label: "Broadcast & Notices",

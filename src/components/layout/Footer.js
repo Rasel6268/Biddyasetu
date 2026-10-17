@@ -21,6 +21,7 @@ const footerLinks = {
   ],
   Community: [
     { label: "Alumni Directory", href: "/members" },
+    { label: "Activity Gallery", href: "/gallery" },
     { label: "Upcoming Events", href: "/events" },
     { label: "Scholarship Program", href: "/#scholarships" },
     { label: "Inspiring Stories", href: "/#stories" },

@@ -111,7 +111,69 @@ export function useUpdateMemberStatus() {
       showSuccess(data?.message || "Member status updated successfully!");
       queryClient.invalidateQueries({ queryKey: ["adminMembers"] });
       queryClient.invalidateQueries({ queryKey: ["memberStats"] });
+      queryClient.invalidateQueries({ queryKey: ["adminDashboardStats"] });
       queryClient.invalidateQueries({ queryKey: ["members"] });
+    },
+    onError: (err) => {
+      showError(err);
+    },
+  });
+}
+
+/**
+ * Hook to fetch Admin Dashboard overview metrics and queues
+ */
+export function useAdminDashboardStats() {
+  return useQuery({
+    queryKey: ["adminDashboardStats"],
+    queryFn: async () => {
+      const response = await api.get("/members/admin/dashboard-stats");
+      return response.data?.data ?? null;
+    },
+    staleTime: 15 * 1000,
+  });
+}
+
+/**
+ * Hook to onboard new member by Admin
+ */
+export function useOnboardMember() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (memberData) => {
+      const response = await api.post("/members/admin/create", memberData);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      showSuccess(data?.message || "Member onboarded successfully!");
+      queryClient.invalidateQueries({ queryKey: ["adminDashboardStats"] });
+      queryClient.invalidateQueries({ queryKey: ["adminMembers"] });
+      queryClient.invalidateQueries({ queryKey: ["memberStats"] });
+      queryClient.invalidateQueries({ queryKey: ["members"] });
+    },
+    onError: (err) => {
+      showError(err);
+    },
+  });
+}
+
+/**
+ * Hook to verify / reconcile payment transaction (Admin)
+ */
+export function useVerifyPayment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (paymentIdOrTrxId) => {
+      const response = await api.put(`/ssl/${paymentIdOrTrxId}/verify`);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      showSuccess(data?.message || "Transaction verified and reconciled!");
+      queryClient.invalidateQueries({ queryKey: ["adminDashboardStats"] });
+      queryClient.invalidateQueries({ queryKey: ["adminMembers"] });
+      queryClient.invalidateQueries({ queryKey: ["memberStats"] });
     },
     onError: (err) => {
       showError(err);
@@ -142,7 +204,7 @@ export function useUpdateMember() {
 }
 
 /**
- * Hook to delete member (Admin)
+ * Hook to delete a member (Admin)
  */
 export function useDeleteMember() {
   const queryClient = useQueryClient();
@@ -155,6 +217,7 @@ export function useDeleteMember() {
     onSuccess: (data) => {
       showSuccess(data?.message || "Member deleted successfully!");
       queryClient.invalidateQueries({ queryKey: ["adminMembers"] });
+      queryClient.invalidateQueries({ queryKey: ["adminDashboardStats"] });
       queryClient.invalidateQueries({ queryKey: ["memberStats"] });
       queryClient.invalidateQueries({ queryKey: ["members"] });
     },
@@ -441,5 +504,142 @@ export function useDeleteMembershipPackage() {
     },
   });
 }
+
+/**
+ * Hook to fetch gallery activities
+ */
+export function useGallery(params = {}) {
+  const { category, search, sortBy } = params;
+  return useQuery({
+    queryKey: ["gallery", category, search, sortBy],
+    queryFn: async () => {
+      const response = await api.get("/gallery", { params });
+      return response.data?.data || [];
+    },
+    staleTime: 30 * 1000,
+  });
+}
+
+/**
+ * Hook to create/upload gallery activity
+ */
+export function useCreateGalleryItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data) => {
+      const response = await api.post("/gallery", data);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      showSuccess(data?.message || "Activity photo shared successfully!");
+      queryClient.invalidateQueries({ queryKey: ["gallery"] });
+    },
+    onError: (err) => {
+      showError(err);
+    },
+  });
+}
+
+/**
+ * Hook to toggle like on gallery item
+ */
+export function useToggleGalleryLike() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id) => {
+      const response = await api.post(`/gallery/${id}/like`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gallery"] });
+    },
+    onError: (err) => {
+      showError(err);
+    },
+  });
+}
+
+/**
+ * Hook to delete gallery item
+ */
+export function useDeleteGalleryItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id) => {
+      const response = await api.delete(`/gallery/${id}`);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      showSuccess(data?.message || "Activity deleted successfully.");
+      queryClient.invalidateQueries({ queryKey: ["gallery"] });
+    },
+    onError: (err) => {
+      showError(err);
+    },
+  });
+}
+
+/**
+ * Hook to fetch dynamic Date-to-Date Financial Statement & Ledger
+ */
+export function useFinancialReport(params = {}) {
+  return useQuery({
+    queryKey: ["financialReport", params],
+    queryFn: async () => {
+      const response = await api.get("/financial-reports", { params });
+      return response.data?.data ?? null;
+    },
+    staleTime: 20 * 1000,
+  });
+}
+
+/**
+ * Hook to record manual income (donation) or expense voucher
+ */
+export function useCreateFinancialRecord() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (recordData) => {
+      const response = await api.post("/financial-reports/records", recordData);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      showSuccess(data?.message || "Record saved successfully!");
+      queryClient.invalidateQueries({ queryKey: ["financialReport"] });
+      queryClient.invalidateQueries({ queryKey: ["adminDashboardStats"] });
+    },
+    onError: (err) => {
+      showError(err);
+    },
+  });
+}
+
+/**
+ * Hook to delete manual financial record
+ */
+export function useDeleteFinancialRecord() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id) => {
+      const response = await api.delete(`/financial-reports/records/${id}`);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      showSuccess(data?.message || "Record deleted successfully.");
+      queryClient.invalidateQueries({ queryKey: ["financialReport"] });
+      queryClient.invalidateQueries({ queryKey: ["adminDashboardStats"] });
+    },
+    onError: (err) => {
+      showError(err);
+    },
+  });
+}
+
+
 
 

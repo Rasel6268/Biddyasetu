@@ -42,12 +42,14 @@ import {
 } from "lucide-react";
 import api from "@/utility/config";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import { useMyEvents } from "@/hooks/useQueries";
+import { useMyEvents, useMembershipPackages } from "@/hooks/useQueries";
 
 export default function MemberDashboardPage() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading: isAuthLoading, updateProfile, changePassword, payMembership, logout } = useAuth();
   console.log(user)
+
+  const { data: dbPackages = [] } = useMembershipPackages();
 
   const [activeTab, setActiveTab] = useState("overview");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -318,15 +320,26 @@ export default function MemberDashboardPage() {
     await logout();
     router.push("/login");
   };
+
+  const activePackage = (dbPackages || []).find((p) => {
+    const userPkg = (member?.packageData?.packageName || member?.tier || "").toLowerCase();
+    const pName = (p.name || "").toLowerCase();
+    return pName === userPkg || userPkg.includes(pName) || pName.includes(userPkg);
+  });
+
+  const dynamicMemberFee = activePackage?.fee !== undefined
+    ? Number(activePackage.fee)
+    : (Number(member?.packageData?.fee) || (member?.membershipDuration === "lifetime" ? 20000 : 1000));
+
   const handleSSLPayment = async (paymentData, customAmount = null) => {
     setIsPayingMembership(true);
     try {
       const targetFee =
         customAmount ||
-        paymentData.packageData?.fee ||
-        (paymentData.membershipDuration === "lifetime" ? 20000 : 1000);
+        dynamicMemberFee;
 
       const targetPackage =
+        activePackage?.name ||
         paymentData.packageData?.packageName ||
         (paymentData.membershipDuration === "lifetime" ? "Life Member" : "General Member");
 
@@ -631,7 +644,7 @@ export default function MemberDashboardPage() {
                       ) : (
                         <>
                           <CreditCard className="w-4 h-4" />
-                          <span>Pay ৳{member.packageData?.fee ? member.packageData.fee.toLocaleString() : (member.membershipDuration === "lifetime" ? "20,000" : "1,000")} Fee</span>
+                          <span>Pay ৳{dynamicMemberFee.toLocaleString()} Fee</span>
                         </>
                       )}
                     </button>
@@ -1796,7 +1809,7 @@ export default function MemberDashboardPage() {
                         {member.paymentStatus === "paid" ? "Support / Donate" : "Membership Dues"}
                       </div>
                       <div className="text-sm font-bold text-slate-800">
-                        {member.paymentStatus === "paid" ? "Scholarship Fund" : `৳${member.packageData?.fee || (member.membershipDuration === "lifetime" ? 20000 : 1000)} Due`}
+                        {member.paymentStatus === "paid" ? "Scholarship Fund" : `৳${dynamicMemberFee.toLocaleString()} Due`}
                       </div>
                     </div>
                     {member.paymentStatus !== "paid" ? (
@@ -1844,7 +1857,7 @@ export default function MemberDashboardPage() {
                     </div>
                     <div className="text-left sm:text-right">
                       <div className="text-2xl font-black text-sky-800">
-                        ৳{member.packageData?.fee ? member.packageData.fee.toLocaleString() : (member.membershipDuration === "lifetime" ? "20,000" : "1,000")}
+                        ৳{dynamicMemberFee.toLocaleString()}
                       </div>
                       <div className="text-xs font-bold text-slate-500">
                         {member.membershipDuration === "lifetime" ? "Lifetime Access" : "Yearly Validity (1 Year)"}

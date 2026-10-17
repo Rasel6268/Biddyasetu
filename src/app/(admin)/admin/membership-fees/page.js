@@ -142,13 +142,22 @@ export default function AdminMembershipFeesPage() {
             : "General Member");
 
       const isPaid = (m.paymentStatus || "").toLowerCase() === "paid";
+      const matchedPkg = packages.find(
+        (p) =>
+          p.name?.toLowerCase() === tierName.toLowerCase() ||
+          tierName.toLowerCase().includes(p.name?.toLowerCase()) ||
+          p.name?.toLowerCase().includes(tierName.toLowerCase())
+      );
       const feeAmount =
-        m.packageData?.fee ||
-        (tierName === "Life Member"
-          ? 20000
-          : tierName.includes("Donor")
-            ? 50000
-            : 1000);
+        m.packageData?.fee !== undefined
+          ? Number(m.packageData.fee)
+          : matchedPkg?.fee !== undefined
+            ? Number(matchedPkg.fee)
+            : (tierName === "Life Member"
+                ? 20000
+                : tierName.includes("Donor")
+                  ? 50000
+                  : 1000);
       const totalPaid = isPaid ? feeAmount : 0;
 
       return {
@@ -183,7 +192,7 @@ export default function AdminMembershipFeesPage() {
           : [],
       };
     });
-  }, [dbMembers]);
+  }, [dbMembers, packages]);
 
   // ─── KPI Calculations ───
   const totalCollected = useMemo(
