@@ -1,10 +1,7 @@
-/**
- * Next.js App Router: automatically served at /sitemap.xml
- * Tells search engines about all public pages and their priority.
- */
+
 export default function sitemap() {
-  const baseUrl = "https://biddyasetu.org";
-  const lastModified = new Date().toISOString();
+  const baseUrl = "https://www.biddyasetu.org";
+  const lastModified = new Date();
 
   return [
     {
@@ -16,14 +13,14 @@ export default function sitemap() {
     {
       url: `${baseUrl}/about`,
       lastModified,
-      changeFrequency: "monthly",
-      priority: 0.9,
+      changeFrequency: "monthly", cd
+      priority: 0.8,
     },
     {
-      url: `${baseUrl}/structure`,
+      url: `${baseUrl}/leadership`,
       lastModified,
       changeFrequency: "monthly",
-      priority: 0.85,
+      priority: 0.8,
     },
     {
       url: `${baseUrl}/members`,
@@ -35,19 +32,19 @@ export default function sitemap() {
       url: `${baseUrl}/events`,
       lastModified,
       changeFrequency: "weekly",
-      priority: 0.88,
+      priority: 0.9,
     },
     {
-      url: `${baseUrl}/membership`,
+      url: `${baseUrl}/gallery`,
       lastModified,
-      changeFrequency: "monthly",
-      priority: 0.95,
+      changeFrequency: "weekly",
+      priority: 0.8,
     },
     {
       url: `${baseUrl}/contact`,
       lastModified,
       changeFrequency: "monthly",
-      priority: 0.8,
+      priority: 0.7,
     },
   ];
 }
