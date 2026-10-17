@@ -1439,12 +1439,12 @@ export default function MemberDashboardPage() {
                           {/* 1. TOP HEADER (Logo + Title) */}
                           <div className="relative z-10 flex items-center gap-2.5 pt-1 pb-1">
                             {/* Logo */}
-                            <div className="relative w-18 h-18 sm:w-20 sm:h-20 shrink-0 bg-white rounded-full p-1 shadow-md border-2 border-white flex items-center justify-center">
+                            <div className="relative shrink-0   p-1    flex items-center justify-center">
                               <Image
                                 src="/logo.png"
                                 alt="Biddyasetu Logo"
-                                width={75}
-                                height={75}
+                                width={100}
+                                height={100}
                                 className="w-full h-full object-contain"
                                 priority
                               />
